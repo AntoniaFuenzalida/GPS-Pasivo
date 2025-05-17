@@ -4,8 +4,9 @@ import { Link } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { BsChatLeftText } from "react-icons/bs";
+import CommentModal from "../components/CommentModal";
 
-// Corrige íconos por defecto de Leaflet
+// Corrige íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -13,19 +14,45 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 
-// Datos simulados
+// Datos de ejemplo
 const ubicaciones = [
-  { nombre: "Max", lugar: "Parque Central", coords: [40.4168, -3.7038], fecha: "27/4/2025, 6:15:00", comentario: true },
-  { nombre: "Max", lugar: "Calle Principal", coords: [40.4180, -3.7058], fecha: "25/4/2025, 10:30:00", comentario: false },
-  { nombre: "Max", lugar: "Calle Pino", coords: [40.4163, -3.7028], fecha: "23/4/2025, 7:20:00", comentario: true },
-  { nombre: "Luna", lugar: "Avenida Roble", coords: [40.4170, -3.7048], fecha: "26/4/2025, 5:15:00", comentario: true },
-  { nombre: "Luna", lugar: "Calle Maple", coords: [40.4196, -3.7006], fecha: "22/4/2025, 9:10:00", comentario: false },
-  { nombre: "Buddy", lugar: "Parque Central", coords: [40.4188, -3.7018], fecha: "24/4/2025, 12:45:00", comentario: false },
-  { nombre: "Buddy", lugar: "Calle Olmo", coords: [40.4148, -3.7058], fecha: "21/4/2025, 11:30:00", comentario: true }
+  {
+    nombre: "Max",
+    lugar: "Parque Central",
+    coords: [40.4168, -3.7038],
+    fecha: "27/4/2025, 6:15:00",
+    comentario: true,
+    comentarioTexto: "Max fue encontrado corriendo sin correa en el parque. Lo detuve hasta que lo escanearon."
+  },
+  {
+    nombre: "Max",
+    lugar: "Calle Principal",
+    coords: [40.4180, -3.7058],
+    fecha: "25/4/2025, 10:30:00",
+    comentario: false
+  },
+  {
+    nombre: "Luna",
+    lugar: "Avenida Roble",
+    coords: [40.4170, -3.7048],
+    fecha: "26/4/2025, 5:15:00",
+    comentario: true,
+    comentarioTexto: "Gatita muy amigable, parecía perdida pero tenía QR visible."
+  },
+  {
+    nombre: "Buddy",
+    lugar: "Calle Olmo",
+    coords: [40.4148, -3.7058],
+    fecha: "21/4/2025, 11:30:00",
+    comentario: true,
+    comentarioTexto: "Estaba asustado en la vereda, escaneé el código y llamé al dueño."
+  }
 ];
 
 const MapPage = () => {
   const [filtro, setFiltro] = useState("Todas");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [comentarioActivo, setComentarioActivo] = useState("");
 
   const mascotasUnicas = [...new Set(ubicaciones.map(u => u.nombre))];
   const ubicacionesFiltradas = filtro === "Todas" ? ubicaciones : ubicaciones.filter(u => u.nombre === filtro);
@@ -39,6 +66,7 @@ const MapPage = () => {
           <Link to="/dashboard" className="hover:text-red-600">Panel de Control</Link>
           <Link to="/mis-mascotas" className="hover:text-red-600">Mis Mascotas</Link>
           <Link to="/mapa" className="hover:text-red-600 font-semibold">Localizaciones</Link>
+          <Link to="/historial" className="hover:text-red-600">Historial de Escaneos</Link>
           <Link to="/notificaciones" className="hover:text-red-600">Notificaciones</Link>
         </nav>
         <div className="w-8 h-8 bg-gray-300 rounded-full" />
@@ -92,7 +120,13 @@ const MapPage = () => {
                   <p className="text-sm text-gray-600">📍 {u.lugar}</p>
                   <p className="text-sm text-gray-600">🗓 {u.fecha}</p>
                   {u.comentario && (
-                    <button className="flex items-center gap-1 mt-2 text-blue-600 text-sm hover:underline">
+                    <button
+                      className="flex items-center gap-1 mt-2 text-blue-600 text-sm hover:underline"
+                      onClick={() => {
+                        setComentarioActivo(u.comentarioTexto || "Sin detalles");
+                        setModalVisible(true);
+                      }}
+                    >
                       <BsChatLeftText /> Ver comentario
                     </button>
                   )}
@@ -101,6 +135,13 @@ const MapPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Modal de comentario */}
+        <CommentModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          comentario={comentarioActivo}
+        />
       </main>
     </div>
   );
