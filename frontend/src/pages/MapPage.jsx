@@ -65,8 +65,7 @@ const MapPage = () => {
         <nav className="flex space-x-6 font-medium text-gray-700">
           <Link to="/dashboard" className="hover:text-red-600">Panel de Control</Link>
           <Link to="/mis-mascotas" className="hover:text-red-600">Mis Mascotas</Link>
-          <Link to="/mapa" className="hover:text-red-600 font-semibold">Localizaciones</Link>
-          <Link to="/historial" className="hover:text-red-600">Historial de Escaneos</Link>
+          <Link to="/mapa" className="hover:text-red-600 font-semibold">Mapa</Link>
           <Link to="/notificaciones" className="hover:text-red-600">Notificaciones</Link>
         </nav>
         <div className="w-8 h-8 bg-gray-300 rounded-full" />
