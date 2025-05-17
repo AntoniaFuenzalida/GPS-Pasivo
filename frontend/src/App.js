@@ -5,6 +5,8 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
+import Notifications from "./pages/Notifications"; 
+import MapPage from "./pages/MapPage";
 
 function App() {
   return (
@@ -14,9 +16,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/notificaciones" element={<Notifications />} /> 
+        <Route path="/mapa" element={<MapPage />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
+
