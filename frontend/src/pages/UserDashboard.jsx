@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { BiQrScan } from "react-icons/bi";
 import AddPetModal from "../components/AddPetModal";
+import QrModal from "../components/QrModal";
 
 const mascotas = [
   { nombre: "Max", tipo: "Perro", raza: "Golden Retriever", escaneos: 12, ultimo: "25/4/2025, 10:30:00" },
@@ -12,6 +13,8 @@ const mascotas = [
 
 const UserDashboard = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [mascotaQR, setMascotaQR] = useState(null);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
@@ -48,7 +51,13 @@ const UserDashboard = () => {
                 <p>Último Escaneo: {mascota.ultimo}</p>
               </div>
               <div className="mt-6 flex flex-wrap gap-2">
-                <button className="flex items-center gap-1 border border-gray-300 px-3 py-1 rounded hover:bg-gray-100">
+                <button
+                  className="flex items-center gap-1 border border-gray-300 px-3 py-1 rounded hover:bg-gray-100"
+                  onClick={() => {
+                    setMascotaQR(mascota);
+                    setQrModalVisible(true);
+                  }}
+                >
                   <BiQrScan /> Código QR
                 </button>
                 <button className="flex items-center gap-1 border border-gray-300 px-3 py-1 rounded hover:bg-gray-100">
@@ -64,6 +73,7 @@ const UserDashboard = () => {
       </main>
 
       <AddPetModal visible={modalVisible} onClose={() => setModalVisible(false)} />
+      <QrModal visible={qrModalVisible} onClose={() => setQrModalVisible(false)} mascota={mascotaQR} />
     </div>
   );
 };
