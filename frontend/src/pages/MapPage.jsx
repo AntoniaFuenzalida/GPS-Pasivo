@@ -1,25 +1,16 @@
-import React, { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 import { BsChatLeftText } from "react-icons/bs";
 import CommentModal from "../components/CommentModal";
-
-// Corrige íconos de Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
-});
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 // Datos de ejemplo
 const ubicaciones = [
   {
     nombre: "Max",
     lugar: "Parque Central",
-    coords: [40.4168, -3.7038],
+    coords: [-3.7038, 40.4168],
     fecha: "27/4/2025, 6:15:00",
     comentario: true,
     comentarioTexto: "Max fue encontrado corriendo sin correa en el parque. Lo detuve hasta que lo escanearon."
@@ -27,14 +18,14 @@ const ubicaciones = [
   {
     nombre: "Max",
     lugar: "Calle Principal",
-    coords: [40.4180, -3.7058],
+    coords: [-3.7058, 40.4180],
     fecha: "25/4/2025, 10:30:00",
     comentario: false
   },
   {
     nombre: "Luna",
     lugar: "Avenida Roble",
-    coords: [40.4170, -3.7048],
+    coords: [-3.7048, 40.4170],
     fecha: "26/4/2025, 5:15:00",
     comentario: true,
     comentarioTexto: "Gatita muy amigable, parecía perdida pero tenía QR visible."
@@ -42,7 +33,7 @@ const ubicaciones = [
   {
     nombre: "Buddy",
     lugar: "Calle Olmo",
-    coords: [40.4148, -3.7058],
+    coords: [-3.7058, 40.4148],
     fecha: "21/4/2025, 11:30:00",
     comentario: true,
     comentarioTexto: "Estaba asustado en la vereda, escaneé el código y llamé al dueño."
@@ -53,9 +44,56 @@ const MapPage = () => {
   const [filtro, setFiltro] = useState("Todas");
   const [modalVisible, setModalVisible] = useState(false);
   const [comentarioActivo, setComentarioActivo] = useState("");
+  const mapContainer = useRef(null);
+  const mapInstance = useRef(null);
+  const [popup, setPopup] = useState(null);
 
   const mascotasUnicas = [...new Set(ubicaciones.map(u => u.nombre))];
   const ubicacionesFiltradas = filtro === "Todas" ? ubicaciones : ubicaciones.filter(u => u.nombre === filtro);
+
+  useEffect(() => {
+    if (!mapContainer.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainer.current,
+      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      center: [-3.7038, 40.4168],
+      zoom: 13
+    });
+
+    mapInstance.current = map;
+
+    ubicacionesFiltradas.forEach(u => {
+      const el = document.createElement("div");
+      el.className = "text-xl cursor-pointer";
+      el.innerText = "📍";
+
+      const marker = new maplibregl.Marker(el)
+        .setLngLat(u.coords)
+        .addTo(map);
+
+      if (u.comentario) {
+        el.onclick = () => {
+          if (popup) popup.remove();
+
+          const newPopup = new maplibregl.Popup({ offset: 25 })
+            .setLngLat(u.coords)
+            .setHTML(`
+              <div>
+                <h3 class="font-bold">${u.nombre}</h3>
+                <p>${u.lugar}</p>
+                <p class="text-sm text-gray-600">${u.fecha}</p>
+              </div>
+            `)
+            .addTo(map);
+
+          setPopup(newPopup);
+        };
+      }
+    });
+
+    return () => map.remove();
+  }, [filtro]);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
@@ -79,21 +117,7 @@ const MapPage = () => {
         <div className="flex flex-col md:flex-row gap-6">
           {/* Mapa */}
           <div className="md:w-2/3 h-[500px] border border-gray-300 rounded overflow-hidden shadow">
-            <MapContainer center={[40.4168, -3.7038]} zoom={13} style={{ height: "100%", width: "100%" }}>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="© OpenStreetMap contributors"
-              />
-              {ubicacionesFiltradas.map((u, i) => (
-                <Marker key={i} position={u.coords}>
-                  <Popup>
-                    <strong>{u.nombre}</strong><br />
-                    {u.lugar}<br />
-                    {u.fecha}
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+            <div ref={mapContainer} className="w-full h-full rounded" />
           </div>
 
           {/* Historial lateral */}

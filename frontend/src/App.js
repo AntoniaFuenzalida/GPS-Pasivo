@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import Notifications from "./pages/Notifications"; 
 import MapPage from "./pages/MapPage";
+import MapTest from "./pages/MapTest";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/notificaciones" element={<Notifications />} /> 
+        <Route path="/mapatest" element={<MapTest />} />
         <Route path="/mapa" element={<MapPage />} />
       </Routes>
     </Router>
