@@ -83,9 +83,43 @@ const eliminarMascota = async (req, res) => {
     }
 }
 
+const editarMascota = async (req, res) => {
+    const { id } = req.params;
+    const { nombre, descripcion} = req.body;
+
+    try {
+        const [result] = await db.query('UPDATE Mascota SET nombre = ?, descripcion = ? WHERE id = ?', [nombre, descripcion, id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Mascota no encontrada' });
+        }
+        res.status(200).json({ message: 'Mascota actualizada correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar la mascota:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+}
+
+const obtenerMascotasPorDueno = async (req, res) => {
+    const { id_dueno } = req.params;
+    try {
+        const [mascotas] = await db.query('SELECT * FROM Mascota WHERE id_dueno = ?', [id_dueno]);
+        
+        if (mascotas.length == 0) {
+            return res.status(404).json({ error: 'No se encontraron mascotas para este dueño' });
+        }
+
+        res.status(200).json(mascotas);
+    } catch (error) {
+        console.error('Error al obtener las mascotas del dueño:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+}
+
 module.exports = {
     crearMascota,
     obtenerMascotas,
     obtenerMascotaPorId,
-    eliminarMascota
+    eliminarMascota,
+    editarMascota,
+    obtenerMascotasPorDueno
 };
