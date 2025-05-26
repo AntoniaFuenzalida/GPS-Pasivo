@@ -12,36 +12,40 @@ const getUsers = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-    const { nombre, correo, contraseña } = req.body;
-  
-    if (!nombre || !correo || !contraseña)
-      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  
-    try {
-      const [existing] = await db.query('SELECT id FROM Usuario WHERE correo = ?', [correo]);
-      if (existing.length > 0) {
-        return res.status(409).json({ error: 'El usuario ya existe' });
-      }
-  
-      const hashedPassword = await bcrypt.hash(contraseña, 10);
-  
-      await db.query(
-        'INSERT INTO Usuario (nombre, correo, contraseña) VALUES (?, ?, ?)',
-        [nombre, correo, hashedPassword]
-      );
-  
-      res.status(201).json({ message: 'Usuario registrado exitosamente' });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error interno del servidor' });
+  const { nombre, correo, contrasena } = req.body;
+
+  console.log("REQ.BODY:", req.body); 
+
+  if (!nombre || !correo || !contrasena) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    const [existing] = await db.query('SELECT id FROM Usuario WHERE correo = ?', [correo]);
+    if (existing.length > 0) {
+      return res.status(409).json({ error: 'El usuario ya existe' });
     }
-  };
+
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
+
+    await db.query(
+      'INSERT INTO Usuario (nombre, correo, contrasena) VALUES (?, ?, ?)',
+      [nombre, correo, hashedPassword]
+    );
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 
   const loginUser = async (req, res) => {
-    const { correo, contraseña } = req.body;
+    const { correo, contrasena } = req.body;
   
-    if (!correo || !contraseña)
-      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+    if (!correo || !contrasena)
+      return res.status(400).json({ error: 'Email y contrasena son requeridos' });
   
     try {
       const [users] = await db.query('SELECT * FROM Usuario WHERE correo = ?', [correo]);
@@ -49,10 +53,10 @@ const registerUser = async (req, res) => {
         return res.status(401).json({ error: 'Usuario no encontrado' });
   
       const user = users[0];
-      const isMatch = await bcrypt.compare(contraseña, user.contraseña);
+      const isMatch = await bcrypt.compare(contrasena, user.contrasena);
   
       if (!isMatch)
-        return res.status(401).json({ error: 'Contraseña incorrecta' });
+        return res.status(401).json({ error: 'contrasena incorrecta' });
   
     const token = jwt.sign(
       { id: user.id, nombre: user.nombre, correo: user.correo, rol: user.rol },
@@ -71,7 +75,7 @@ const registerUser = async (req, res) => {
   
   const updateUser = async (req, res) => {
     const userId = req.user.id;
-    const { nombre, correo, contraseña } = req.body;
+    const { nombre, correo, contrasena } = req.body;
 
     try {
       let query = 'UPDATE Usuario SET';
@@ -87,9 +91,9 @@ const registerUser = async (req, res) => {
         params.push(correo);
       }
 
-      if (contraseña) {
-        const hashed = await bcrypt.hash(contraseña, 10);
-        query += ' contraseña = ?,';
+      if (contrasena) {
+        const hashed = await bcrypt.hash(contrasena, 10);
+        query += ' contrasena = ?,';
         params.push(hashed);
       }
 
