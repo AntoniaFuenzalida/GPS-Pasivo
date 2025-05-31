@@ -1,6 +1,6 @@
 import React from "react";
 
-const stats = [
+const statsPrincipales = [
   {
     title: "Total Usuarios",
     value: 245,
@@ -26,40 +26,43 @@ const stats = [
 const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
-      <h1 className="text-3xl font-bold mb-1">Panel de Administración</h1>
-      <p className="text-gray-500 mb-6">
-        Gestiona usuarios, mascotas y visualiza estadísticas del sistema
-      </p>
+      {/* Encabezado */}
+      <div className="mb-8 animate-fadeIn">
+        <h1 className="text-3xl font-extrabold">Panel de Administración</h1>
+        <p className="text-gray-600 mt-1">
+          Gestiona usuarios, mascotas y visualiza estadísticas del sistema
+        </p>
+      </div>
 
-      {/* Métricas Principales */}
-      <div className="grid md:grid-cols-4 gap-4 mb-10">
-        {stats.map((s, i) => (
+      {/* Estadísticas Principales */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 animate-fadeIn">
+        {statsPrincipales.map((stat, idx) => (
           <div
-            key={i}
-            className="bg-white border border-gray-300 rounded-lg p-5 shadow"
+            key={idx}
+            className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow"
           >
-            <h3 className="text-sm text-gray-500">{s.title}</h3>
-            <p className="text-2xl font-bold mt-1">{s.value}</p>
-            <p className="text-sm text-green-600 mt-1">{s.change}</p>
+            <h3 className="text-sm text-gray-500">{stat.title}</h3>
+            <p className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</p>
+            <p className="text-sm text-green-600 mt-1">{stat.change}</p>
           </div>
         ))}
       </div>
 
       {/* Actividad Reciente */}
-      <div className="bg-white rounded-lg p-6 border border-gray-300 shadow">
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 animate-fadeIn">
         <h2 className="text-xl font-bold mb-2">Actividad Reciente</h2>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-gray-600 mb-6">
           Resumen de la actividad reciente del sistema
         </p>
-        <div className="grid md:grid-cols-4 gap-4">
-          {stats.map((s, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statsPrincipales.map((stat, idx) => (
             <div
-              key={`recent-${i}`}
-              className="bg-gray-50 rounded-lg p-5 border border-gray-200"
+              key={`recent-${idx}`}
+              className="bg-gray-50 rounded-lg border border-gray-200 p-5 hover:bg-white transition-colors"
             >
-              <h3 className="text-sm text-gray-500">{s.title}</h3>
-              <p className="text-2xl font-bold mt-1">{s.value}</p>
-              <p className="text-sm text-green-600 mt-1">{s.change}</p>
+              <h3 className="text-sm text-gray-500">{stat.title}</h3>
+              <p className="text-2xl font-bold text-gray-800 mt-2">{stat.value}</p>
+              <p className="text-sm text-green-600 mt-1">{stat.change}</p>
             </div>
           ))}
         </div>

@@ -1,8 +1,8 @@
-import React from "react";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import React, { useState } from "react";
+import { FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { PiPawPrintFill } from "react-icons/pi";
 
-const usuarios = [
+const datosIniciales = [
   {
     nombre: "Juan Pérez",
     correo: "usuario@ejemplo.com",
@@ -42,69 +42,116 @@ const usuarios = [
 
 const badgeStyle = {
   Activo: "bg-green-100 text-green-800",
-  Inactivo: "bg-gray-200 text-gray-600",
+  Inactivo: "bg-red-100 text-red-800",
   Pendiente: "bg-yellow-100 text-yellow-800",
 };
 
 const AdminUsuarios = () => {
+  const [usuarios,] = useState(datosIniciales);
+  const [busqueda, setBusqueda] = useState("");
+
+  const usuariosFiltrados = usuarios.filter((u) =>
+    `${u.nombre} ${u.correo} ${u.estado}`
+      .toLowerCase()
+      .includes(busqueda.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
-      <h1 className="text-3xl font-bold mb-1">Panel de Administración</h1>
-      <p className="text-gray-500 mb-6">
-        Gestiona usuarios, mascotas y visualiza estadísticas del sistema
-      </p>
-
-      <div className="bg-white border border-gray-300 rounded-lg p-6 shadow">
-        <h2 className="text-xl font-bold mb-1">Usuarios</h2>
-        <p className="text-sm text-gray-500 mb-4">
+      {/* Encabezado */}
+      <div className="mb-8 animate-fadeIn">
+        <h1 className="text-3xl font-extrabold">Usuarios</h1>
+        <p className="text-gray-600 mt-1">
           Gestionar cuentas de usuario en el sistema
         </p>
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-separate border-spacing-y-2">
-            <thead>
-              <tr className="text-sm text-gray-600">
-                <th className="px-3 py-2">Nombre</th>
-                <th className="px-3 py-2">Correo</th>
-                <th className="px-3 py-2">Mascotas</th>
-                <th className="px-3 py-2">Estado</th>
-                <th className="px-3 py-2">Registrado</th>
-                <th className="px-3 py-2 text-center">Acciones</th>
+      {/* Buscador */}
+      <div className="mb-6 relative max-w-md animate-fadeIn">
+        <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Buscar por nombre, correo o estado..."
+          className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
+      </div>
+
+      {/* Tabla estilizada */}
+      <div className="overflow-x-auto animate-fadeIn">
+        <table className="w-full bg-white shadow-lg rounded-lg overflow-hidden">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Nombre
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Correo
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Mascotas
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Estado
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Registrado
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-medium text-gray-600">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {usuariosFiltrados.map((u, i) => (
+              <tr
+                key={i}
+                className="border-b last:border-0 hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">
+                  {u.nombre}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {u.correo}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {u.mascotas}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${badgeStyle[u.estado]}`}
+                  >
+                    {u.estado}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {u.fecha}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                  <button
+                    className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+                    title="Editar"
+                  >
+                    <FiEdit2 className="text-gray-600" />
+                  </button>
+                  <button
+                    className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+                    title="Ver mascotas"
+                  >
+                    <PiPawPrintFill className="text-gray-600" />
+                  </button>
+                  <button
+                    className="p-2 rounded-md bg-gray-100 hover:bg-red-100 transition text-red-600"
+                    title="Eliminar"
+                  >
+                    <FiTrash2 />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {usuarios.map((u, i) => (
-                <tr key={i} className="bg-white hover:bg-gray-50 rounded transition">
-                  <td className="px-3 py-2 font-medium">{u.nombre}</td>
-                  <td className="px-3 py-2">{u.correo}</td>
-                  <td className="px-3 py-2">{u.mascotas}</td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`px-3 py-1 text-xs rounded-full font-semibold ${badgeStyle[u.estado]}`}
-                    >
-                      {u.estado}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">{u.fecha}</td>
-                  <td className="px-3 py-2 flex justify-center gap-2 text-lg">
-                    <button className="p-2 rounded hover:bg-gray-100" title="Editar">
-                      <FiEdit2 />
-                    </button>
-                    <button className="p-2 rounded hover:bg-gray-100" title="Ver mascotas">
-                      <PiPawPrintFill />
-                    </button>
-                    <button
-                      className="p-2 rounded hover:bg-red-100 text-red-600"
-                      title="Eliminar"
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
