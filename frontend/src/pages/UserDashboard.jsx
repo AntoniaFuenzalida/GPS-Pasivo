@@ -127,9 +127,10 @@ const handleEliminar = async (id, index) => {
                 <button
                   className="flex items-center gap-1 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
                   onClick={() => {
-                    setMascotaEditando({ ...mascota, index: idx });
+                    setMascotaEditando({ ...mascota, index: idx }); 
                     setModalVisible(true);
                   }}
+
                 >
                   <FiEdit className="text-gray-600" /> Editar
                 </button>
@@ -158,8 +159,23 @@ const handleEliminar = async (id, index) => {
         onSave={async (nuevaMascota, index) => {
           try {
             if (typeof index === "number") {
-              // Aquí podrías llamar a editarMascota
+              // Modo edición
+              const mascotaOriginal = mascotas[index];
+              await editarMascota(mascotaOriginal.id, nuevaMascota);
+
+              setMascotas((prev) =>
+                prev.map((m, i) =>
+                  i === index
+                    ? {
+                        ...m,
+                        nombre: nuevaMascota.nombre,
+                        descripcion: nuevaMascota.descripcion,
+                      }
+                    : m
+                )
+              );
             } else {
+              // Modo creación
               const mascotaARegistrar = {
                 ...nuevaMascota,
                 id_dueno: idDueno,
@@ -184,6 +200,7 @@ const handleEliminar = async (id, index) => {
             console.error("Error al guardar la mascota:", error);
           }
         }}
+
       />
 
       {/* Modal de QR */}
