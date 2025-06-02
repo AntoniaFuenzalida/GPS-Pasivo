@@ -3,127 +3,119 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
 
-  const [formData, setFormData] = useState({
-    nombre: "",
-    correo: "",
-    contrasena: "",
-    confirmar: "",
-  });
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (formData.contrasena !== formData.confirmar) {
-      setError("Las contrasenas no coinciden");
+    // Validación simple de contraseñas
+    if (password !== confirm) {
+      alert("Las contraseñas no coinciden.");
       return;
     }
-
-    try {
-      const response = await fetch("http://localhost:3001/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          correo: formData.correo,
-          contrasena: formData.contrasena,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("Usuario registrado correctamente");
-        setTimeout(() => navigate("/login"), 1500);
-      } else {
-        setError(data.error || "Error en el registro");
-      }
-    } catch (err) {
-      setError("Error de conexión con el servidor");
-    }
+    // Lógica de registro (por ejemplo, llamada a API)
+    console.log("Registrando:", { fullName, email, password });
+    // Si el registro es exitoso:
+    navigate("/login");
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center text-gray-900 px-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow p-8">
-        <h2 className="text-2xl font-bold mb-2">Crear una cuenta</h2>
-        <p className="text-sm text-gray-600 mb-6">
-          Regístrate para gestionar la información de identificación de tu mascota
-        </p>
-
-        {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-        {success && <p className="text-green-600 text-sm mb-2">{success}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">Nombre Completo</label>
-            <input
-              type="text"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              placeholder="Juan Pérez"
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Correo Electrónico</label>
-            <input
-              type="email"
-              name="correo"
-              value={formData.correo}
-              onChange={handleChange}
-              placeholder="juan@ejemplo.com"
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Contraseña</label>
-            <input
-              type="password"
-              name="contrasena"
-              value={formData.contrasena}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Confirmar Contraseña</label>
-            <input
-              type="password"
-              name="confirmar"
-              value={formData.confirmar}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
-          >
-            Registrarse
-          </button>
-        </form>
-
-        <p className="text-sm text-center mt-6">
-          ¿Ya tienes una cuenta?{" "}
-          <Link to="/login" className="text-red-600 font-medium hover:underline">
-            Iniciar Sesión
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 animate-fadeIn">
+        {/* Logo y título */}
+        <div className="text-center mb-6">
+          <Link to="/" className="text-2xl font-bold text-red-600 flex items-center justify-center gap-2">
+            🐾 MascotasID
           </Link>
-        </p>
+          <h1 className="text-3xl font-extrabold mt-4">Crear una Cuenta</h1>
+        </div>
+
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Nombre Completo */}
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre Completo
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Juan Pérez"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Correo Electrónico
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="usuario@ejemplo.com"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+              required
+            />
+          </div>
+
+          {/* Contraseña */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+              required
+            />
+          </div>
+
+          {/* Confirmar Contraseña */}
+          <div>
+            <label htmlFor="confirm" className="block text-sm font-medium text-gray-700 mb-1">
+              Confirmar Contraseña
+            </label>
+            <input
+              id="confirm"
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+              required
+            />
+          </div>
+
+          {/* Botón Registrarse */}
+          <div>
+            <button
+              type="submit"
+              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
+            >
+              Registrarse
+            </button>
+          </div>
+
+          {/* Enlace a Login */}
+          <p className="text-center text-gray-600 text-sm">
+            ¿Ya tienes una cuenta?{" "}
+            <Link to="/login" className="text-red-600 hover:underline">
+              Iniciar Sesión
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );

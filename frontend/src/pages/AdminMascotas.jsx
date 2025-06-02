@@ -1,124 +1,155 @@
-import React from "react";
-import { FiMessageSquare } from "react-icons/fi";
+import React, { useState } from "react";
+import { FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { BiQrScan } from "react-icons/bi";
 
-const escaneos = [
+const datosIniciales = [
   {
-    mascota: "Max",
+    nombre: "Max",
+    tipo: "Perro",
+    raza: "Golden Retriever",
     dueno: "Juan Pérez",
-    fecha: "27/4/2025, 6:15:00",
-    ubicacion: "Aproximado: Parque Central",
-    estado: "Notificado",
-    comentario: "Sí",
+    fechaRegistro: "01/02/2025",
   },
   {
-    mascota: "Max",
-    dueno: "Juan Pérez",
-    fecha: "25/4/2025, 10:30:00",
-    ubicacion: "Aproximado: Calle Principal",
-    estado: "Notificado",
-    comentario: "No",
-  },
-  {
-    mascota: "Luna",
+    nombre: "Luna",
+    tipo: "Gato",
+    raza: "Siamés",
     dueno: "María González",
-    fecha: "26/4/2025, 5:15:00",
-    ubicacion: "Aproximado: Avenida Roble",
-    estado: "Notificado",
-    comentario: "Sí",
+    fechaRegistro: "15/03/2025",
   },
   {
-    mascota: "Buddy",
+    nombre: "Buddy",
+    tipo: "Perro",
+    raza: "Labrador",
     dueno: "Roberto Jiménez",
-    fecha: "24/4/2025, 12:45:00",
-    ubicacion: "Aproximado: Parque Central",
-    estado: "Nuevo",
-    comentario: "No",
+    fechaRegistro: "20/04/2025",
   },
   {
-    mascota: "Max",
-    dueno: "Juan Pérez",
-    fecha: "23/4/2025, 7:20:00",
-    ubicacion: "Aproximado: Calle Pino",
-    estado: "Notificado",
-    comentario: "Sí",
+    nombre: "Molly",
+    tipo: "Ave",
+    raza: "Canario",
+    dueno: "Ana Martínez",
+    fechaRegistro: "05/05/2025",
   },
   {
-    mascota: "Luna",
-    dueno: "María González",
-    fecha: "22/4/2025, 9:10:00",
-    ubicacion: "Aproximado: Calle Maple",
-    estado: "Notificado",
-    comentario: "Sí",
+    nombre: "Rocky",
+    tipo: "Perro",
+    raza: "Bulldog",
+    dueno: "Carlos Wilson",
+    fechaRegistro: "12/05/2025",
   },
 ];
 
-const badgeStyle = {
-  Notificado: "bg-gray-200 text-gray-800",
-  Nuevo: "bg-blue-100 text-blue-800",
-};
+const AdminMascotas = () => {
+  const [mascotas, setMascotas] = useState(datosIniciales);
+  const [busqueda, setBusqueda] = useState("");
 
-const AdminEscaneos = () => {
+  const mascotasFiltradas = mascotas.filter((m) =>
+    `${m.nombre} ${m.tipo} ${m.raza} ${m.dueno}`
+      .toLowerCase()
+      .includes(busqueda.toLowerCase())
+  );
+
+  const handleEliminar = (index) => {
+    setMascotas((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
-      <h1 className="text-3xl font-bold mb-1">Panel de Administración</h1>
-      <p className="text-gray-500 mb-6">
-        Gestiona usuarios, mascotas y visualiza estadísticas del sistema
-      </p>
-
-      <div className="bg-white border border-gray-300 rounded-lg p-6 shadow">
-        <h2 className="text-xl font-bold mb-2">Todos los Escaneos</h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Historial completo de escaneos de códigos QR en el sistema
+      {/* Encabezado */}
+      <div className="mb-8 animate-fadeIn">
+        <h1 className="text-3xl font-extrabold">Mascotas</h1>
+        <p className="text-gray-600 mt-1">
+          Gestiona las mascotas registradas en el sistema
         </p>
+      </div>
 
+      {/* Buscador */}
+      <div className="mb-6 relative max-w-md animate-fadeIn">
+        <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Buscar por mascota, dueño, ubicación o comentario..."
-          className="w-full mb-4 px-4 py-2 rounded border border-gray-300 bg-white text-sm"
+          placeholder="Buscar por nombre, tipo, raza o dueño..."
+          className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
         />
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-separate border-spacing-y-2">
-            <thead>
-              <tr className="text-sm text-gray-600">
-                <th className="px-3 py-2">Mascota</th>
-                <th className="px-3 py-2">Dueño</th>
-                <th className="px-3 py-2">Fecha y Hora</th>
-                <th className="px-3 py-2">Ubicación</th>
-                <th className="px-3 py-2">Estado</th>
-                <th className="px-3 py-2">Comentario</th>
+      {/* Tabla estilizada */}
+      <div className="overflow-x-auto animate-fadeIn">
+        <table className="w-full bg-white shadow-lg rounded-lg overflow-hidden">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Nombre
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Tipo
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Raza
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Dueño
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                Fecha Registro
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-medium text-gray-600">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {mascotasFiltradas.map((m, i) => (
+              <tr
+                key={i}
+                className="border-b last:border-0 hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">
+                  {m.nombre}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {m.tipo}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {m.raza}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {m.dueno}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {m.fechaRegistro}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-center flex justify-center gap-2">
+                  <button
+                    className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+                    title="Editar"
+                  >
+                    <FiEdit2 className="text-gray-600" />
+                  </button>
+                  <button
+                    className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+                    title="Ver QR"
+                  >
+                    <BiQrScan className="text-gray-600" />
+                  </button>
+                  <button
+                    className="p-2 rounded-md bg-gray-100 hover:bg-red-100 transition text-red-600"
+                    title="Eliminar"
+                    onClick={() => handleEliminar(i)}
+                  >
+                    <FiTrash2 />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {escaneos.map((e, i) => (
-                <tr key={i} className="bg-white hover:bg-gray-50 transition rounded">
-                  <td className="px-3 py-2 font-medium">{e.mascota}</td>
-                  <td className="px-3 py-2">{e.dueno}</td>
-                  <td className="px-3 py-2">{e.fecha}</td>
-                  <td className="px-3 py-2">{e.ubicacion}</td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`px-3 py-1 text-xs rounded-full font-semibold ${badgeStyle[e.estado]}`}
-                    >
-                      {e.estado}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 flex items-center gap-2 text-sm">
-                    <FiMessageSquare />
-                    {e.comentario === "Sí" ? (
-                      <button className="text-blue-600 hover:underline">Ver</button>
-                    ) : (
-                      <span className="text-gray-500">Sin comentario</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
-export default AdminEscaneos;
+export default AdminMascotas;
