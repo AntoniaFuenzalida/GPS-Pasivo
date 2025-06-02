@@ -10,7 +10,8 @@ const crearMascota = async (req, res) => {
 
     try {
         const fecha_registro = new Date();
-        const estado = 'fuera de línea';
+        const estado = 'monitoreada'; 
+
 
         // Verificar si el usuario existe
         const [usuarios] = await db.query('SELECT nombre FROM Usuario WHERE id = ?', [id_dueno]);
@@ -67,21 +68,22 @@ const obtenerMascotaPorId = async (req, res) => {
 }
 
 const eliminarMascota = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        const [result] = await db.query('DELETE FROM Mascota WHERE id = ?', [id]);
+  try {
+    const [result] = await db.query('DELETE FROM Mascota WHERE id = ?', [id]);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Mascota no encontrada' });
-        }
-
-        res.status(200).json({ message: 'Mascota eliminada correctamente' });
-    } catch (error) {
-        console.error('Error al eliminar la mascota:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Mascota no encontrada' });
     }
-}
+
+    res.status(200).json({ message: 'Mascota eliminada correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar la mascota:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 
 const editarMascota = async (req, res) => {
     const { id } = req.params;

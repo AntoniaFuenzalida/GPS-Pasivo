@@ -1,52 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiEdit, FiTrash2, FiSearch } from "react-icons/fi";
 import { BiQrScan } from "react-icons/bi";
 import AddOrEditPetModal from "../components/AddOrEditPetModal";
 import QrModal from "../components/QrModal";
+import {
+  obtenerMascotasPorDueno,
+  crearMascota,
+  editarMascota,
+  eliminarMascota
+} from "../services/mascotaServices";
 
-const datosMascotasInicial = [
-  {
-    nombre: "Max",
-    tipo: "Perro",
-    raza: "Golden Retriever",
-    escaneos: 12,
-    ultimo: "25/4/2025, 10:30:00",
-  },
-  {
-    nombre: "Luna",
-    tipo: "Gato",
-    raza: "Siamés",
-    escaneos: 5,
-    ultimo: "26/4/2025, 5:15:00",
-  },
-  {
-    nombre: "Buddy",
-    tipo: "Perro",
-    raza: "Labrador",
-    escaneos: 8,
-    ultimo: "24/4/2025, 12:45:00",
-  },
-];
 
 const UserDashboard = () => {
-  const [mascotas, setMascotas] = useState(datosMascotasInicial);
-  const [busqueda, setBusqueda] = useState("");          // Para filtro (opcional)
+  const [mascotas, setMascotas] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [mascotaQR, setMascotaQR] = useState(null);
   const [mascotaEditando, setMascotaEditando] = useState(null);
 
-  // Filtrar por nombre, tipo o raza (puedes ajustar campos)
+  const idDueno = 1; // ← Reemplaza por ID real del usuario si tienes login implementado
+
+  // Obtener mascotas desde el backend
+useEffect(() => {
+  const cargarMascotas = async () => {
+    try {
+      const resultado = await obtenerMascotasPorDueno(1); 
+      console.log("Mascotas cargadas:", resultado); 
+      setMascotas(resultado); 
+    } catch (error) {
+      console.error("Error al cargar mascotas:", error);
+    }
+  };
+
+  cargarMascotas();
+}, []);
+
+  // Filtro de búsqueda
   const mascotasFiltradas = mascotas.filter((m) =>
-    `${m.nombre} ${m.tipo} ${m.raza}`
+    `${m.nombre} ${m.tipo || ""} ${m.raza || ""}`
       .toLowerCase()
       .includes(busqueda.toLowerCase())
   );
 
-  const handleEliminar = (index) => {
-    setMascotas((prev) => prev.filter((_, i) => i !== index));
-  };
+const handleEliminar = async (id, index) => {
+  try {
+    await eliminarMascota(id); // Llama al backend
+    setMascotas((prev) => prev.filter((_, i) => i !== index)); // Actualiza la vista
+    console.log("Mascota eliminada con éxito.");
+  } catch (error) {
+    console.error("Error al eliminar la mascota:", error);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
@@ -56,15 +63,9 @@ const UserDashboard = () => {
           🐾 MascotasID
         </Link>
         <nav className="flex space-x-6 font-medium text-gray-700">
-          <Link to="/dashboard" className="hover:text-red-600">
-            Panel de Control
-          </Link>
-          <Link to="/mapa" className="hover:text-red-600">
-            Mapa
-          </Link>
-          <Link to="/notificaciones" className="hover:text-red-600">
-            Notificaciones
-          </Link>
+          <Link to="/dashboard" className="hover:text-red-600">Panel de Control</Link>
+          <Link to="/mapa" className="hover:text-red-600">Mapa</Link>
+          <Link to="/notificaciones" className="hover:text-red-600">Notificaciones</Link>
         </nav>
         <div className="w-8 h-8 bg-gray-300 rounded-full" />
       </header>
@@ -85,7 +86,7 @@ const UserDashboard = () => {
           </button>
         </div>
 
-        {/* Buscador (opcional) */}
+        {/* Buscador */}
         <div className="mb-6 relative max-w-md animate-fadeIn">
           <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
           <input
@@ -97,7 +98,7 @@ const UserDashboard = () => {
           />
         </div>
 
-        {/* Grid de tarjetas de mascota */}
+        {/* Grid de mascotas */}
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
           {mascotasFiltradas.map((mascota, idx) => (
             <div
@@ -105,12 +106,10 @@ const UserDashboard = () => {
               className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow"
             >
               <h3 className="text-xl font-semibold text-gray-800">{mascota.nombre}</h3>
-              <p className="mt-1 text-gray-600">
-                {mascota.tipo} · {mascota.raza}
-              </p>
+              <p className="mt-1 text-gray-600">{mascota.tipo || "Tipo desconocido"} · {mascota.raza || "Raza desconocida"}</p>
               <div className="mt-4 text-gray-700">
-                <p>Total de Escaneos: {mascota.escaneos}</p>
-                <p>Último Escaneo: {mascota.ultimo}</p>
+                <p>Total de Escaneos: {mascota.escaneos ?? 0}</p>
+                <p>Último Escaneo: {mascota.ultimo ?? "Sin registro"}</p>
               </div>
 
               {/* Botones de acción */}
@@ -128,19 +127,21 @@ const UserDashboard = () => {
                 <button
                   className="flex items-center gap-1 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
                   onClick={() => {
-                    setMascotaEditando({ ...mascota, index: idx });
+                    setMascotaEditando({ ...mascota, index: idx }); 
                     setModalVisible(true);
                   }}
+
                 >
                   <FiEdit className="text-gray-600" /> Editar
                 </button>
 
                 <button
                   className="flex items-center gap-1 border border-red-500 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition"
-                  onClick={() => handleEliminar(idx)}
+                  onClick={() => handleEliminar(mascota.id, idx)} // ← PASA el ID real
                 >
                   <FiTrash2 /> Eliminar
                 </button>
+
               </div>
             </div>
           ))}
@@ -155,18 +156,51 @@ const UserDashboard = () => {
           setMascotaEditando(null);
         }}
         mascota={mascotaEditando}
-        onSave={(nuevaMascota, index) => {
-          setMascotas((prev) => {
+        onSave={async (nuevaMascota, index) => {
+          try {
             if (typeof index === "number") {
-              const copia = [...prev];
-              copia[index] = nuevaMascota;
-              return copia;
+              // Modo edición
+              const mascotaOriginal = mascotas[index];
+              await editarMascota(mascotaOriginal.id, nuevaMascota);
+
+              setMascotas((prev) =>
+                prev.map((m, i) =>
+                  i === index
+                    ? {
+                        ...m,
+                        nombre: nuevaMascota.nombre,
+                        descripcion: nuevaMascota.descripcion,
+                      }
+                    : m
+                )
+              );
+            } else {
+              // Modo creación
+              const mascotaARegistrar = {
+                ...nuevaMascota,
+                id_dueno: idDueno,
+              };
+
+              const response = await crearMascota(mascotaARegistrar);
+
+              setMascotas((prev) => [
+                ...prev,
+                {
+                  ...nuevaMascota,
+                  id: response.id,
+                  escaneos: 0,
+                  ultimo: new Date().toLocaleString(),
+                },
+              ]);
             }
-            return [...prev, nuevaMascota];
-          });
-          setModalVisible(false);
-          setMascotaEditando(null);
+
+            setModalVisible(false);
+            setMascotaEditando(null);
+          } catch (error) {
+            console.error("Error al guardar la mascota:", error);
+          }
         }}
+
       />
 
       {/* Modal de QR */}

@@ -1,5 +1,3 @@
-// src/pages/MapPage.jsx
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BsChatLeftText } from "react-icons/bs";
@@ -81,7 +79,7 @@ const MapPage = () => {
       el.className = "text-2xl cursor-pointer";
       el.innerText = "📍";
 
-      const marker = new maplibregl.Marker(el).setLngLat(u.coords).addTo(map);
+      new maplibregl.Marker(el).setLngLat(u.coords).addTo(map); // sin const marker
 
       if (u.comentario) {
         el.onclick = () => {
@@ -109,7 +107,7 @@ const MapPage = () => {
         mapInstance.current = null;
       }
     };
-  }, [filtro]);
+  }, [popup, ubicacionesFiltradas]); // ✅ Dependencias corregidas
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
