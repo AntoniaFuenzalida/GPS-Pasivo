@@ -10,13 +10,38 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
     ubicacion: "",
     telefonoPrincipal: "",
     telefonoSecundario: "",
+    // Nota: no incluimos imagenUrl directamente en form, lo manejamos aparte
   });
 
-  // Cuando cambie la mascota a editar, actualizamos el estado del formulario
+  const [imagenFile, setImagenFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  // Cuando cambie la mascota a editar, actualizamos el estado del formulario y la imagen
   useEffect(() => {
     if (mascota) {
-      setForm({ ...mascota });
+      // Rellena campos del formulario
+      setForm({
+        nombre: mascota.nombre || "",
+        tipo: mascota.tipo || "",
+        raza: mascota.raza || "",
+        edad: mascota.edad || "",
+        alergias: mascota.alergias || "",
+        ubicacion: mascota.ubicacion || "",
+        telefonoPrincipal: mascota.telefonoPrincipal || "",
+        telefonoSecundario: mascota.telefonoSecundario || "",
+      });
+
+      // Si la mascota ya tiene una URL de imagen (mascota.imagenUrl), úsala como preview
+      if (mascota.imagenUrl) {
+        setPreviewUrl(mascota.imagenUrl);
+      } else {
+        setPreviewUrl("");
+      }
+
+      // Limpiar posible imagen nueva seleccionada
+      setImagenFile(null);
     } else {
+      // Modal de "añadir nueva mascota": campos vacíos
       setForm({
         nombre: "",
         tipo: "",
@@ -27,6 +52,8 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
         telefonoPrincipal: "",
         telefonoSecundario: "",
       });
+      setPreviewUrl("");
+      setImagenFile(null);
     }
   }, [mascota]);
 
@@ -35,9 +62,26 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Cuando el usuario selecciona un archivo de imagen
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagenFile(file);
+
+      // Generar URL de previsualización
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form, mascota?.index);
+    // Llamamos a onSave pasando todos los datos del formulario
+    // incluimos imagenFile en form.imagenFile para que onSave lo reciba
+    onSave({ ...form, imagenFile }, mascota?.index);
   };
 
   // No renderizamos nada si visible = false
@@ -68,6 +112,7 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* SECCIÓN: Nombre, Tipo, Raza, Edad */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -119,6 +164,7 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
             </div>
           </div>
 
+          {/* SECCIÓN: Alergias/Información Médica */}
           <div>
             <label className="block text-sm font-medium mb-1">
               Alergias/Información Médica
@@ -132,6 +178,7 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
             />
           </div>
 
+          {/* SECCIÓN: Referencia de Ubicación */}
           <div>
             <label className="block text-sm font-medium mb-1">
               Referencia de Ubicación
@@ -144,6 +191,7 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
             />
           </div>
 
+          {/* SECCIÓN: Teléfonos */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -169,12 +217,43 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
             </div>
           </div>
 
+          {/* SECCIÓN: Imagen de la Mascota */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Imagen de la Mascota (Opcional)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+                         file:rounded-lg file:border-0
+                         file:text-sm file:font-semibold
+                         file:bg-red-50 file:text-red-700
+                         hover:file:bg-red-100"
+            />
+            {/* Previsualización de la imagen seleccionada o existente */}
+            {previewUrl && (
+              <div className="mt-3">
+                <p className="text-xs text-gray-500 mb-1">Previsualización:</p>
+                <img
+                  src={previewUrl}
+                  alt="Previsualización de mascota"
+                  className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* BOTÓN DE SUBMIT */}
           <div className="pt-4 text-center">
             <button
               type="submit"
               className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
             >
-              {mascota ? "Guardar Cambios" : "Registrar Mascota y Generar Código QR"}
+              {mascota
+                ? "Guardar Cambios"
+                : "Registrar Mascota y Generar Código QR"}
             </button>
           </div>
         </form>
@@ -184,4 +263,3 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
 };
 
 export default AddOrEditPetModal;
-//holi
