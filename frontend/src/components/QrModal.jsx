@@ -5,8 +5,10 @@ const QrModal = ({ visible, onClose, mascota }) => {
   const canvasRef = useRef();
 
   if (!visible || !mascota) return null;
-
+  
+  // Generar el valor del QR con la URL de la mascota
   const qrValue = `https://localhost:3001/api/mascotas/${mascota.id}`;
+
 
   const handleDownload = () => {
     const canvas = canvasRef.current?.querySelector("canvas");
