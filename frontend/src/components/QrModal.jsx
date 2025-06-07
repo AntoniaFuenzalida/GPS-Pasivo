@@ -6,7 +6,7 @@ const QrModal = ({ visible, onClose, mascota }) => {
 
   if (!visible || !mascota) return null;
 
-  const qrValue = `https://tudominio.com/mascota/${mascota.nombre}`;
+  const qrValue = `https://localhost:3001/api/mascotas/${mascota.id}`;
 
   const handleDownload = () => {
     const canvas = canvasRef.current?.querySelector("canvas");
@@ -28,14 +28,48 @@ const QrModal = ({ visible, onClose, mascota }) => {
         >
           &times;
         </button>
-        <h2 className="text-lg font-bold mb-4 text-center">Código QR de {mascota.nombre}</h2>
+        <h2 className="text-lg font-bold mb-4 text-center">
+          Código QR de {mascota.nombre}
+        </h2>
 
         <div className="flex justify-center mb-4" ref={canvasRef}>
           <QRCodeCanvas value={qrValue} size={200} />
         </div>
 
+        {/* Información de la mascota */}
+        <div className="border rounded-lg p-3 mb-4 bg-gray-50">
+          <h3 className="font-medium text-gray-800 mb-2">
+            Información de la mascota
+          </h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="text-gray-600">Nombre:</div>
+            <div className="font-medium">{mascota.nombre}</div>
+
+            {mascota.nombre_dueno && (
+              <>
+                <div className="text-gray-600">Dueño:</div>
+                <div className="font-medium">{mascota.nombre_dueno}</div>
+              </>
+            )}
+
+            {mascota.especie && (
+              <>
+                <div className="text-gray-600">Especie:</div>
+                <div className="font-medium">{mascota.especie}</div>
+              </>
+            )}
+
+            {mascota.raza && (
+              <>
+                <div className="text-gray-600">Raza:</div>
+                <div className="font-medium">{mascota.raza}</div>
+              </>
+            )}
+          </div>
+        </div>
+
         <div className="text-sm text-center text-gray-600 mb-4">
-          Escanea este código para ver la ficha de {mascota.nombre}
+          Escanea este código para ver la ficha completa de {mascota.nombre}
         </div>
 
         <div className="text-center">
