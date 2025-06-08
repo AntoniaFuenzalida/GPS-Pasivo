@@ -13,18 +13,20 @@ const AdminUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [busqueda, setBusqueda] = useState("");
 
-  useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/users");
-        setUsuarios(response.data);
-      } catch (err) {
-        console.error("Error al obtener usuarios:", err);
-      }
-    };
 
-    fetchUsuarios();
-  }, []);
+const fetchUsuarios = async () => {
+  try {
+    const response = await axios.get("http://localhost:3001/api/users");
+    setUsuarios(response.data);
+  } catch (err) {
+    console.error("Error al obtener usuarios:", err);
+  }
+};
+
+useEffect(() => {
+  fetchUsuarios();
+}, []);
+
 
   const usuariosFiltrados = usuarios.filter((u) =>
     `${u.nombre} ${u.correo} ${u.estado || ""}`

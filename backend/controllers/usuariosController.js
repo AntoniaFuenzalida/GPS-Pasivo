@@ -4,12 +4,17 @@ const jwt = require('jsonwebtoken');
 
 const getUsers = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM Usuario');
+    const [rows] = await db.query(`
+      SELECT U.id, U.nombre, U.correo, U.estado, U.fecha,
+      (SELECT COUNT(*) FROM Mascota M WHERE M.id_dueno = U.id) AS mascotas
+      FROM Usuario U
+    `);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 const registerUser = async (req, res) => {
   const { nombre, correo, contrasena } = req.body;
