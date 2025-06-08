@@ -1,24 +1,28 @@
 import React, { useRef } from "react";
-import { QRCodeCanvas } from "qrcode.react";
+import QRCode from "react-qr-code";
+import { toPng } from "html-to-image";
 
 const QrModal = ({ visible, onClose, mascota }) => {
-  const canvasRef = useRef();
+  const qrRef = useRef();
 
   if (!visible || !mascota) return null;
-  
-  // Generar el valor del QR con la URL de la mascota
+
+  // URL para el QR
   const qrValue = `https://localhost:3001/api/mascotas/${mascota.id}`;
 
+  // Descargar QR como imagen PNG
+  const handleDownload = async () => {
+    if (!qrRef.current) return;
 
-  const handleDownload = () => {
-    const canvas = canvasRef.current?.querySelector("canvas");
-    if (!canvas) return;
-
-    const url = canvas.toDataURL("image/png");
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `qr-${mascota.nombre}.png`;
-    link.click();
+    try {
+      const dataUrl = await toPng(qrRef.current);
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `qr-${mascota.nombre}.png`;
+      link.click();
+    } catch (err) {
+      console.error("Error al descargar QR:", err);
+    }
   };
 
   return (
@@ -34,8 +38,9 @@ const QrModal = ({ visible, onClose, mascota }) => {
           Código QR de {mascota.nombre}
         </h2>
 
-        <div className="flex justify-center mb-4" ref={canvasRef}>
-          <QRCodeCanvas value={qrValue} size={200} />
+        {/* Código QR (SVG) */}
+        <div className="flex justify-center mb-4 bg-white p-4 rounded" ref={qrRef}>
+          <QRCode value={qrValue} size={200} />
         </div>
 
         {/* Información de la mascota */}
