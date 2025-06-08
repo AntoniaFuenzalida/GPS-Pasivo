@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -8,18 +9,30 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Validación simple de contraseñas
-    if (password !== confirm) {
-      alert("Las contraseñas no coinciden.");
-      return;
-    }
-    // Lógica de registro (por ejemplo, llamada a API)
-    console.log("Registrando:", { fullName, email, password });
-    // Si el registro es exitoso:
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (password !== confirm) {
+    alert("Las contraseñas no coinciden.");
+    return;
+  }
+
+  try {
+    const response = await axios.post("http://localhost:3001/api/register", {
+      nombre: fullName,
+      correo: email,
+      contrasena: password,
+    });
+
+    console.log("✅ Registro exitoso:", response.data);
+    alert("¡Usuario registrado exitosamente!");
     navigate("/login");
-  };
+
+  } catch (error) {
+    console.error("❌ Error al registrar:", error.response?.data || error.message);
+    alert(error.response?.data?.error || "Ocurrió un error al registrar");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">

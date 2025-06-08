@@ -1,23 +1,43 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { loginUser, getMe } from "../services/authService";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación
-    console.log("Login con:", { email, password });
-    // Por ejemplo, si el login es exitoso:
-    navigate("/dashboard");
+    setError(null);
+
+    try {
+      // 1. Login → obtener token
+      const { token } = await loginUser({ correo: email, contrasena: password });
+
+      // 2. Guardar token en localStorage
+      localStorage.setItem("token", token);
+
+      // 3. Obtener datos del usuario logueado
+      const usuario = await getMe(token);
+      console.log("👤 Usuario logueado:", usuario);
+
+      // (Opcional) Guardarlo en estado global / contexto / localStorage:
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+
+      // 4. Redirigir al dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("❌ Error de login:", err.response?.data || err.message);
+      setError(err.response?.data?.error || "Error al iniciar sesión");
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 animate-fadeIn">
-        {/* Logo y título */}
         <div className="text-center mb-6">
           <Link to="/" className="text-2xl font-bold text-red-600 flex items-center justify-center gap-2">
             🐾 MascotasID
@@ -25,7 +45,6 @@ const Login = () => {
           <h1 className="text-3xl font-extrabold mt-4">Iniciar Sesión</h1>
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email */}
           <div>
@@ -59,7 +78,10 @@ const Login = () => {
             />
           </div>
 
-          {/* Botón Iniciar Sesión */}
+          {/* Mostrar error si hay */}
+          {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+
+          {/* Botón */}
           <div>
             <button
               type="submit"
@@ -69,7 +91,6 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Enlace a Registro */}
           <p className="text-center text-gray-600 text-sm">
             ¿No tienes una cuenta?{" "}
             <Link to="/register" className="text-red-600 hover:underline">
