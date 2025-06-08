@@ -9,6 +9,8 @@ import Notifications from "./pages/Notifications";
 import MapPage from "./pages/MapPage";
 import MapTest from "./pages/MapTest";
 
+import GuestPetView from "./pages/GuestPetView";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsuarios from "./pages/AdminUsuarios";
 import AdminMascotas from "./pages/AdminMascotas";
@@ -27,6 +29,9 @@ function App() {
         <Route path="/notificaciones" element={<Notifications />} />
         <Route path="/mapa" element={<MapPage />} />
         <Route path="/mapatest" element={<MapTest />} />
+
+        {/* Vista de invitado para ver datos de la mascota al escanear el QR */}
+        <Route path="/pet/:id" element={<GuestPetView />} />
 
         {/* Grupo de rutas administrativas bajo un layout común */}
         <Route path="/admin" element={<AdminLayout />}>
