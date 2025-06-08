@@ -6,9 +6,10 @@ const QrModal = ({ visible, onClose, mascota }) => {
   const qrRef = useRef();
 
   if (!visible || !mascota) return null;
-
-  // URL para el QR
-  const qrValue = `https://localhost:3001/api/mascotas/${mascota.id}`;
+  
+  // Generar el valor del QR con la URL de la mascota
+  const qrValue = `http://34.67.77.73:4000/track?id=${mascota.id}`;
+  
 
   // Descargar QR como imagen PNG
   const handleDownload = async () => {
