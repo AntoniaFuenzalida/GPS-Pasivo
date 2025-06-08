@@ -32,13 +32,18 @@ const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-    await db.query(
+    const [result] = await db.query(
       'INSERT INTO Usuario (nombre, correo, contrasena) VALUES (?, ?, ?)',
       [nombre, correo, hashedPassword]
     );
 
-    res.status(201).json({ message: 'Usuario registrado exitosamente' });
+    console.log("👤 Resultado de INSERT:", result); // ⬅️ log clave
+
+    res.status(201).json({ 
+      message: 'Usuario registrado exitosamente',
+      id: result.insertId
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -64,7 +69,7 @@ const registerUser = async (req, res) => {
         return res.status(401).json({ error: 'contrasena incorrecta' });
   
     const token = jwt.sign(
-      { id: user.id, nombre: user.nombre, correo: user.correo, rol: user.rol },
+       {id: user.id, nombre: user.nombre, correo: user.correo },
 
         process.env.JWT_SECRET || "claveSecreta",
         { expiresIn: '1h' }
@@ -115,5 +120,37 @@ const registerUser = async (req, res) => {
     }
 };
 
+const eliminarUsuario = async (req, res) => {
+  const { id } = req.params;
 
-module.exports = { registerUser, getUsers , loginUser , updateUser};
+  try {
+    // 1. Obtener IDs de mascotas del usuario
+    const [mascotas] = await db.query('SELECT id FROM Mascota WHERE id_dueno = ?', [id]);
+
+    // 2. Eliminar localizaciones asociadas a cada mascota
+    for (const mascota of mascotas) {
+      await db.query('DELETE FROM Localizacion WHERE mascota_id = ?', [mascota.id]);
+    }
+
+    // 3. Eliminar mascotas
+    await db.query('DELETE FROM Mascota WHERE id_dueno = ?', [id]);
+
+    // 4. Eliminar usuario
+    const [result] = await db.query('DELETE FROM Usuario WHERE id = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({ message: 'Usuario, mascotas y localizaciones eliminados correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al eliminar el usuario' });
+  }
+};
+
+
+
+
+
+module.exports = { registerUser, getUsers , loginUser , updateUser, eliminarUsuario};

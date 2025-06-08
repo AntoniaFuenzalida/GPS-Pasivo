@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { PiPawPrintFill } from "react-icons/pi";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+ 
 const badgeStyle = {
   Activo: "bg-green-100 text-green-800",
   Inactivo: "bg-red-100 text-red-800",
@@ -33,6 +35,17 @@ useEffect(() => {
       .toLowerCase()
       .includes(busqueda.toLowerCase())
   );
+
+  const handleEliminar = async (id) => {
+  try {
+    await axios.delete(`http://localhost:3001/api/users/${id}`);
+    setUsuarios(prev => prev.filter(u => u.id !== id));
+    toast.success("Usuario eliminado correctamente");
+  } catch (err) {
+    toast.error(err?.response?.data?.error || "Error al eliminar usuario");
+    console.error("Error al eliminar usuario:", err);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
@@ -90,9 +103,14 @@ useEffect(() => {
                   <button className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition" title="Ver mascotas">
                     <PiPawPrintFill className="text-gray-600" />
                   </button>
-                  <button className="p-2 rounded-md bg-gray-100 hover:bg-red-100 transition text-red-600" title="Eliminar">
+                  <button
+                    className="p-2 rounded-md bg-gray-100 hover:bg-red-100 transition text-red-600"
+                    title="Eliminar"
+                    onClick={() => handleEliminar(u.id)}
+                  >
                     <FiTrash2 />
                   </button>
+
                 </td>
               </tr>
             ))}

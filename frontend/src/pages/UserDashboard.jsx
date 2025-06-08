@@ -11,8 +11,11 @@ import {
   eliminarMascota
 } from "../services/mascotaServices";
 
-
 const UserDashboard = () => {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const idDueno = usuario?.id;
+  const nombreDueno = usuario?.nombre || "Usuario";
+
   const [mascotas, setMascotas] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -20,22 +23,22 @@ const UserDashboard = () => {
   const [mascotaQR, setMascotaQR] = useState(null);
   const [mascotaEditando, setMascotaEditando] = useState(null);
 
-  const idDueno = 1; // ← Reemplaza por ID real del usuario si tienes login implementado
-
   // Obtener mascotas desde el backend
-useEffect(() => {
-  const cargarMascotas = async () => {
-    try {
-      const resultado = await obtenerMascotasPorDueno(1); 
-      console.log("Mascotas cargadas:", resultado); 
-      setMascotas(resultado); 
-    } catch (error) {
-      console.error("Error al cargar mascotas:", error);
-    }
-  };
+  useEffect(() => {
+    const cargarMascotas = async () => {
+      try {
+        const resultado = await obtenerMascotasPorDueno(idDueno);
+        console.log("Mascotas cargadas:", resultado);
+        setMascotas(resultado);
+      } catch (error) {
+        console.error("Error al cargar mascotas:", error);
+      }
+    };
 
-  cargarMascotas();
-}, []);
+    if (idDueno) {
+      cargarMascotas();
+    }
+  }, [idDueno]);
 
   // Filtro de búsqueda
   const mascotasFiltradas = mascotas.filter((m) =>
@@ -44,16 +47,15 @@ useEffect(() => {
       .includes(busqueda.toLowerCase())
   );
 
-const handleEliminar = async (id, index) => {
-  try {
-    await eliminarMascota(id); // Llama al backend
-    setMascotas((prev) => prev.filter((_, i) => i !== index)); // Actualiza la vista
-    console.log("Mascota eliminada con éxito.");
-  } catch (error) {
-    console.error("Error al eliminar la mascota:", error);
-  }
-};
-
+  const handleEliminar = async (id, index) => {
+    try {
+      await eliminarMascota(id);
+      setMascotas((prev) => prev.filter((_, i) => i !== index));
+      console.log("Mascota eliminada con éxito.");
+    } catch (error) {
+      console.error("Error al eliminar la mascota:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
@@ -67,12 +69,24 @@ const handleEliminar = async (id, index) => {
           <Link to="/mapa" className="hover:text-red-600">Mapa</Link>
           <Link to="/notificaciones" className="hover:text-red-600">Notificaciones</Link>
         </nav>
-        <div className="w-8 h-8 bg-gray-300 rounded-full" />
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-gray-700">👋 {nombreDueno}</span>
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("usuario");
+              window.location.href = "/login"; // Redirigir
+            }}
+            className="text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </header>
+
 
       {/* Contenido */}
       <main className="px-8 py-10">
-        {/* Título */}
         <div className="flex justify-between items-center mb-6 animate-fadeIn">
           <h1 className="text-3xl font-extrabold">Mis Mascotas</h1>
           <button
@@ -112,7 +126,6 @@ const handleEliminar = async (id, index) => {
                 <p>Último Escaneo: {mascota.ultimo ?? "Sin registro"}</p>
               </div>
 
-              {/* Botones de acción */}
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   className="flex items-center gap-1 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
@@ -127,21 +140,19 @@ const handleEliminar = async (id, index) => {
                 <button
                   className="flex items-center gap-1 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
                   onClick={() => {
-                    setMascotaEditando({ ...mascota, index: idx }); 
+                    setMascotaEditando({ ...mascota, index: idx });
                     setModalVisible(true);
                   }}
-
                 >
                   <FiEdit className="text-gray-600" /> Editar
                 </button>
 
                 <button
                   className="flex items-center gap-1 border border-red-500 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition"
-                  onClick={() => handleEliminar(mascota.id, idx)} // ← PASA el ID real
+                  onClick={() => handleEliminar(mascota.id, idx)}
                 >
                   <FiTrash2 /> Eliminar
                 </button>
-
               </div>
             </div>
           ))}
@@ -159,7 +170,6 @@ const handleEliminar = async (id, index) => {
         onSave={async (nuevaMascota, index) => {
           try {
             if (typeof index === "number") {
-              // Modo edición
               const mascotaOriginal = mascotas[index];
               await editarMascota(mascotaOriginal.id, nuevaMascota);
 
@@ -175,7 +185,6 @@ const handleEliminar = async (id, index) => {
                 )
               );
             } else {
-              // Modo creación
               const mascotaARegistrar = {
                 ...nuevaMascota,
                 id_dueno: idDueno,
@@ -200,7 +209,6 @@ const handleEliminar = async (id, index) => {
             console.error("Error al guardar la mascota:", error);
           }
         }}
-
       />
 
       {/* Modal de QR */}
