@@ -1,45 +1,18 @@
-import React, { useState } from "react";
-import { FiEdit, FiTrash2, FiSearch, FiX } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { FiSearch, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { PiPawPrintFill } from "react-icons/pi";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+ 
+const badgeStyle = {
+  Activo: "bg-green-100 text-green-800",
+  Inactivo: "bg-red-100 text-red-800",
+  Pendiente: "bg-yellow-100 text-yellow-800",
+};
 
 const AdminUsuarios = () => {
-  const initialUsers = [
-    {
-      id: 1,
-      nombre: "Juan Pérez",
-      correo: "juan.perez@ejemplo.com",
-      estado: "Activo",
-      registrado: "15/01/2025",
-      mascotas: [
-        { id: 101, nombre: "Max", tipo: "Perro", raza: "Golden Retriever" },
-        { id: 102, nombre: "Luna", tipo: "Gato", raza: "Siamés" },
-      ],
-    },
-    {
-      id: 2,
-      nombre: "María González",
-      correo: "maria.gonzalez@ejemplo.com",
-      estado: "Activo",
-      registrado: "20/02/2025",
-      mascotas: [
-        { id: 103, nombre: "Chispa", tipo: "Ave", raza: "Periquito" },
-      ],
-    },
-    {
-      id: 3,
-      nombre: "Roberto Jiménez",
-      correo: "roberto.jimenez@ejemplo.com",
-      estado: "Inactivo",
-      registrado: "10/03/2025",
-      mascotas: [
-        { id: 104, nombre: "Buddy", tipo: "Perro", raza: "Labrador" },
-        { id: 105, nombre: "Mimi", tipo: "Gato", raza: "Persa" },
-        { id: 106, nombre: "Kiwi", tipo: "Ave", raza: "Canario" },
-      ],
-    },
-  ];
-
-  const [users, setUsers] = useState(initialUsers);
+  const [usuarios, setUsuarios] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -47,45 +20,57 @@ const AdminUsuarios = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editForm, setEditForm] = useState({ nombre: "", correo: "", estado: "" });
 
-  const filteredUsers = users.filter(u =>
-    `${u.nombre} ${u.correo} ${u.estado}`
+
+const fetchUsuarios = async () => {
+  try {
+    const response = await axios.get("http://localhost:3001/api/users");
+    setUsuarios(response.data);
+  } catch (err) {
+    console.error("Error al obtener usuarios:", err);
+  }
+};
+
+useEffect(() => {
+  fetchUsuarios();
+}, []);
+
+
+  const usuariosFiltrados = usuarios.filter((u) =>
+    `${u.nombre} ${u.correo} ${u.estado || ""}`
       .toLowerCase()
       .includes(busqueda.toLowerCase())
   );
+  const handleEliminar = async (id) => {
+  try {
+    await axios.delete(`http://localhost:3001/api/users/${id}`);
+    setUsuarios(prev => prev.filter(u => u.id !== id));
+    toast.success("Usuario eliminado correctamente");
+  } catch (err) {
+    toast.error(err?.response?.data?.error || "Error al eliminar usuario");
+    console.error("Error al eliminar usuario:", err);
+  }
+};
 
-  const handleOpenEdit = (user) => {
-    setSelectedUser(user);
-    setEditForm({ nombre: user.nombre, correo: user.correo, estado: user.estado });
-    setShowEditModal(true);
-  };
-
-  const handleSaveEdit = () => {
-    setUsers(prev =>
-      prev.map(u =>
-        u.id === selectedUser.id
-          ? { ...u, ...editForm }
-          : u
-      )
-    );
+const handleSaveEdit = async () => {
+  try {
+    await axios.put(`http://localhost:3001/api/update`, editForm);
+    toast.success("Usuario actualizado correctamente");
     setShowEditModal(false);
     setSelectedUser(null);
-  };
+    fetchUsuarios(); // Recargar la lista
+  } catch (err) {
+    toast.error(err?.response?.data?.error || "Error al actualizar usuario");
+    console.error("Error al actualizar usuario:", err);
+  }
+};
 
-  const handleOpenPets = (user) => {
-    setSelectedUser(user);
-    setShowPetsModal(true);
-  };
-
-  const handleOpenDelete = (user) => {
-    setSelectedUser(user);
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setUsers(prev => prev.filter(u => u.id !== selectedUser.id));
+const handleConfirmDelete = async () => {
+  if (selectedUser) {
+    await handleEliminar(selectedUser.id);
     setShowDeleteModal(false);
     setSelectedUser(null);
-  };
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
@@ -110,58 +95,63 @@ const AdminUsuarios = () => {
         <table className="min-w-full table-auto">
           <thead className="bg-gray-200">
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Nombre</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Correo</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Mascotas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Estado</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Registrado</th>
-              <th className="px-4 py-2 text-center text-sm font-medium text-gray-700">Acciones</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Nombre</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Correo</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Mascotas</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Estado</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Registrado</th>
+              <th className="px-6 py-3 text-center text-sm font-medium text-gray-600">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user.id} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm">{user.nombre}</td>
-                <td className="px-4 py-3 text-sm">{user.correo}</td>
-                <td className="px-4 py-3 text-sm">{user.mascotas.length}</td>
-                <td className="px-4 py-3 text-sm">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      user.estado === "Activo"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {user.estado}
+            {usuariosFiltrados.map((u, i) => (
+              <tr key={i} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">{u.nombre}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{u.correo}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{u.mascotas || 0}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badgeStyle[u.estado] || 'bg-gray-100 text-gray-700'}`}>
+                    {u.estado || "Sin estado"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm">{user.registrado}</td>
-                <td className="px-4 py-3 text-center space-x-2">
-                  <button
-                    onClick={() => handleOpenEdit(user)}
-                    className="inline-flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"
-                    title="Editar Usuario"
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {u.fecha || "—"}
+                </td>                <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                  <button 
+                    className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition" 
+                    title="Editar"
+                    onClick={() => {
+                      setSelectedUser(u);
+                      setEditForm({ nombre: u.nombre, correo: u.correo, estado: u.estado || "" });
+                      setShowEditModal(true);
+                    }}
                   >
-                    <FiEdit />
+                    <FiEdit2 className="text-gray-600" />
+                  </button>
+                  <button 
+                    className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition" 
+                    title="Ver mascotas"
+                    onClick={() => {
+                      setSelectedUser(u);
+                      setShowPetsModal(true);
+                    }}
+                  >
+                    <PiPawPrintFill className="text-gray-600" />
                   </button>
                   <button
-                    onClick={() => handleOpenPets(user)}
-                    className="inline-flex items-center gap-1 bg-yellow-50 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-100 transition"
-                    title="Ver Mascotas"
-                  >
-                    <PiPawPrintFill />
-                  </button>
-                  <button
-                    onClick={() => handleOpenDelete(user)}
-                    className="inline-flex items-center gap-1 bg-red-50 text-red-600 px-3 py-1 rounded hover:bg-red-100 transition"
-                    title="Eliminar Usuario"
+                    className="p-2 rounded-md bg-gray-100 hover:bg-red-100 transition text-red-600"
+                    title="Eliminar"
+                    onClick={() => {
+                      setSelectedUser(u);
+                      setShowDeleteModal(true);
+                    }}
                   >
                     <FiTrash2 />
                   </button>
+
                 </td>
-              </tr>
-            ))}
-            {filteredUsers.length === 0 && (
+              </tr>            ))}
+            {usuariosFiltrados.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
                   No hay usuarios que coincidan con la búsqueda.
@@ -182,14 +172,12 @@ const AdminUsuarios = () => {
           setEditForm={setEditForm}
           onSave={handleSaveEdit}
         />
-      )}
-
-      {/* ViewPetsModal */}
+      )}      {/* ViewPetsModal */}
       {showPetsModal && selectedUser && (
         <ViewPetsModal
           visible={showPetsModal}
           onClose={() => { setShowPetsModal(false); setSelectedUser(null); }}
-          mascotas={selectedUser.mascotas}
+          userId={selectedUser.id}
         />
       )}
 
@@ -277,8 +265,32 @@ const EditUserModal = ({ visible, onClose, user, editForm, setEditForm, onSave }
 };
 
 /* ViewPetsModal */
-const ViewPetsModal = ({ visible, onClose, mascotas }) => {
+const ViewPetsModal = ({ visible, onClose, mascotas, userId }) => {
+  const [mascotasData, setMascotasData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (visible && userId) {
+      fetchMascotasUsuario(userId);
+    }
+  }, [visible, userId]);
+
+  const fetchMascotasUsuario = async (id) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:3001/api/mascotas/dueno/${id}`);
+      setMascotasData(response.data);
+    } catch (err) {
+      console.error("Error al obtener mascotas:", err);
+      toast.error("Error al cargar las mascotas");
+      setMascotasData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!visible) return null;
+  
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-start pt-24 z-[9999] overflow-auto"
@@ -291,16 +303,24 @@ const ViewPetsModal = ({ visible, onClose, mascotas }) => {
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl">
           <FiX />
         </button>
-        <h2 className="text-2xl font-bold mb-2">Mascotas asociadas ({mascotas.length})</h2>
+        <h2 className="text-2xl font-bold mb-2">
+          Mascotas asociadas ({loading ? "..." : mascotasData.length})
+        </h2>
         <p className="text-sm text-gray-500 mb-4">Listado de mascotas de este usuario.</p>
         <div className="space-y-4 max-h-80 overflow-y-auto">
-          {mascotas.map(m => (
-            <div key={m.id} className="border-b pb-2 mb-2 last:border-none last:mb-0">
-              <p className="font-semibold">{m.nombre}</p>
-              <p className="text-gray-600 text-sm">{m.tipo} · {m.raza}</p>
-            </div>
-          ))}
-          {mascotas.length === 0 && <p className="text-gray-600 text-center">No hay mascotas.</p>}
+          {loading ? (
+            <p className="text-gray-600 text-center">Cargando mascotas...</p>
+          ) : mascotasData.length > 0 ? (
+            mascotasData.map(m => (
+              <div key={m.id} className="border-b pb-2 mb-2 last:border-none last:mb-0">
+                <p className="font-semibold">{m.nombre}</p>
+                <p className="text-gray-600 text-sm">{m.descripcion}</p>
+                <p className="text-gray-500 text-xs">Registrada: {new Date(m.fecha_registro).toLocaleDateString()}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-600 text-center">No hay mascotas registradas.</p>
+          )}
         </div>
         <div className="pt-4 text-right">
           <button onClick={onClose} className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">

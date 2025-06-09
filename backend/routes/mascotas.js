@@ -13,15 +13,14 @@ const {
   obtenerUltimaUbicacionPorMascota
 } = require('../controllers/mascotaController');
 
-// Rutas con prefijo relativo "/mascotas"
-router.post('/mascotas/crear', crearMascota);
-router.get('/mascotas/obtener', obtenerMascotas);
-router.get('/mascotas/obtener/:id', obtenerMascotaPorId);
-router.delete('/mascotas/eliminar/:id', eliminarMascota);
-router.put('/mascotas/editar/:id', editarMascota);
-router.get('/mascotas/dueno/:id_dueno', obtenerMascotasPorDueno); 
-router.get('/mascotas/comentarios/:id_mascota', obtenerComentariosPorMascota);
-router.get('/mascotas/ubicacion/:id_mascota', obtenerUltimaUbicacionPorMascota);
-
+// Rutas principales (ya tienen el prefijo /api/mascotas desde app.js)
+router.post('/crear', crearMascota);
+router.get('/obtener', obtenerMascotas);
+router.get('/obtener/:id', obtenerMascotaPorId);
+router.delete('/eliminar/:id', eliminarMascota);
+router.put('/editar/:id', editarMascota);
+router.get('/dueno/:id_dueno', obtenerMascotasPorDueno);
+router.get('/comentarios/:id_mascota', obtenerComentariosPorMascota);
+router.get('/ubicacion/:id_mascota', obtenerUltimaUbicacionPorMascota);
 
 module.exports = router;

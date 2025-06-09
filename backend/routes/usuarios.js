@@ -7,8 +7,10 @@ const {
   registerUser,
   loginUser,
   updateUser,
-  obtenerContacto
+  obtenerContacto,
+  eliminarUsuario
 } = require('../controllers/usuariosController');
+
 const verifyToken = require('../controllers/authMiddleware'); 
 const bcrypt = require('bcrypt');
 
@@ -18,7 +20,9 @@ const bcrypt = require('bcrypt');
 router.get('/users', getUsers);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/usuarios/contacto/:id', obtenerContacto)
+router.delete('/users/:id', eliminarUsuario);
+router.get('/usuarios/contacto/:id', obtenerContacto);
+
 
 // Rutas protegidas
 router.put('/update', verifyToken, updateUser);
@@ -27,7 +31,7 @@ router.put('/update', verifyToken, updateUser);
 router.get('/me', verifyToken, async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT nombre, correo, departamento, oficina FROM Usuario WHERE id = ?',
+      'SELECT id, nombre, correo, tipo, estado, fecha FROM Usuario WHERE id = ?',
       [req.user.id]
     );
 
@@ -37,9 +41,12 @@ router.get('/me', verifyToken, async (req, res) => {
 
     res.json(rows[0]);
   } catch (err) {
+    console.error("❌ Error en /me:", err);
     res.status(500).json({ error: 'Error al obtener datos del usuario' });
   }
 });
+
+
 
 router.put('/cambiar-contrasena', verifyToken, async (req, res) => {
   console.log("Ruta cambiar-contrasena activa");
@@ -48,14 +55,14 @@ router.put('/cambiar-contrasena', verifyToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const [rows] = await db.query('SELECT contrasena FROM Usuario WHERE id = ?', [userId]); // ✅
+    const [rows] = await db.query('SELECT contrasena FROM Usuario WHERE id = ?', [userId]); 
     if (rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    const coincide = await bcrypt.compare(actual, rows[0].contrasena); // ✅
+    const coincide = await bcrypt.compare(actual, rows[0].contrasena);
     if (!coincide) return res.status(400).json({ error: 'Contraseña actual incorrecta' });
 
     const hashedNueva = await bcrypt.hash(nueva, 10);
-    await db.query('UPDATE Usuario SET contrasena = ? WHERE id = ?', [hashedNueva, userId]); // ✅
+    await db.query('UPDATE Usuario SET contrasena = ? WHERE id = ?', [hashedNueva, userId]);
 
     res.json({ message: 'Contraseña actualizada correctamente' });
   } catch (err) {

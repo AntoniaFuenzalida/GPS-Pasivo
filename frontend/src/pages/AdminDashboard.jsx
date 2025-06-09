@@ -1,29 +1,49 @@
-import React from "react";
-
-const statsPrincipales = [
-  {
-    title: "Total Usuarios",
-    value: 245,
-    change: "+12% desde el mes pasado",
-  },
-  {
-    title: "Total Mascotas",
-    value: 378,
-    change: "+18% desde el mes pasado",
-  },
-  {
-    title: "Total Escaneos",
-    value: 1429,
-    change: "+24% desde el mes pasado",
-  },
-  {
-    title: "Usuarios Activos",
-    value: 189,
-    change: "+8% desde el mes pasado",
-  },
-];
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    totalUsuarios: 0,
+    totalMascotas: 0,
+    totalEscaneos: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:3001/api/estadisticas/totales");
+        setStats(data);
+      } catch (error) {
+        console.error("Error al obtener estadísticas:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const statsPrincipales = [
+    {
+      title: "Total Usuarios",
+      value: stats.totalUsuarios,
+      change: "+12% desde el mes pasado",
+    },
+    {
+      title: "Total Mascotas",
+      value: stats.totalMascotas,
+      change: "+18% desde el mes pasado",
+    },
+    {
+      title: "Total Escaneos",
+      value: stats.totalEscaneos,
+      change: "+24% desde el mes pasado",
+    },
+    {
+      title: "Usuarios Activos",
+      value: Math.floor(stats.totalUsuarios * 0.75), // Suponiendo 75% activos
+      change: "+8% desde el mes pasado",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
       {/* Encabezado */}

@@ -2,17 +2,20 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const estadisticasRoutes = require('./routes/estadisticas');
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/estadisticas', estadisticasRoutes);
+
 
 // Rutas
 const userRoutes = require('./routes/usuarios');
 const mascotaRoutes = require('./routes/mascotas');
 const localizacionRoutes = require('./routes/localizacion');
 
-app.use('/api', userRoutes);      // por ejemplo: /api/usuarios/login
-app.use('/api', mascotaRoutes);   // por ejemplo: /api/mascotas/dueno/:id_dueno
-app.use('/api', localizacionRoutes); // por ejemplo: /api/localizaciones/obtener
+app.use('/api', userRoutes);      
+app.use('/api/mascotas', mascotaRoutes);  
+app.use('/api', localizacionRoutes); 
 
 module.exports = app;

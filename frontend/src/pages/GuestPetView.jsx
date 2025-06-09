@@ -10,8 +10,7 @@ import CommentsModal from "../components/CommentsModal";
 const GuestPetView = () => {
   const { id } = useParams();
   const [mascotaComentarios, setMascotaComentarios] = useState(null);
-  const [ultimaUbicacion, setUltimaUbicacion] = useState({
- });
+  const [ultimaUbicacion, setUltimaUbicacion] = useState({});
   const [mascota, setMascota] = useState(null);
   const [mostrarNotas, setMostrarNotas] = useState(false);
 
@@ -19,7 +18,7 @@ const GuestPetView = () => {
   const [contacto, setContacto] = useState({
     telefono: "No disponible", 
     correo: "No disponible"
-  });
+    });
 
   // 1. Modifica fetchContacto para aceptar un ID como parámetro
   const fetchContacto = useCallback(async (duenoId) => {
@@ -35,10 +34,18 @@ const GuestPetView = () => {
         throw new Error("Error al obtener el contacto del dueño");
       }
       const data = await response.json();
-      setContacto(data);
+      setContacto({
+        telefono: data.telefono || "No disponible",
+        correo: data.correo || "No disponible"
+      });
       console.log("Contacto obtenido:", data);
     } catch (error) {
       console.error("Error fetching contacto:", error);
+      // En caso de error, mantener valores por defecto
+      setContacto({
+        telefono: "No disponible",
+        correo: "No disponible"
+      });
     }
   }, []); // No necesita dependencias porque ahora recibe el ID por parámetro
 

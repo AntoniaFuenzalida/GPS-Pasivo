@@ -36,6 +36,7 @@ const crearMascota = async (req, res) => {
   }
 };
 
+
 const obtenerMascotas = async (req, res) => {
   try {
     const [mascotas] = await db.query("SELECT * FROM Mascota");
@@ -74,7 +75,15 @@ const eliminarMascota = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await db.query("DELETE FROM Mascota WHERE id = ?", [id]);
+    // Verifica qué localizaciones están asociadas
+    const [locs] = await db.query('SELECT * FROM Localizacion WHERE mascota_id = ?', [id]);
+    console.log("Localizaciones que se van a eliminar:", locs);
+
+    // Elimina primero las localizaciones asociadas
+    await db.query('DELETE FROM Localizacion WHERE mascota_id = ?', [id]);
+
+    // Luego elimina la mascota
+    const [result] = await db.query('DELETE FROM Mascota WHERE id = ?', [id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Mascota no encontrada" });
