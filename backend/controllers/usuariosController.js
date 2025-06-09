@@ -124,17 +124,15 @@ const obtenerContacto = async (req, res) => {
   const userId = req.params.id;
 
   try {
-    const [rows] = await db.query('SELECT nombre, correo FROM Usuario WHERE id = ?', [userId]);
+    const [rows] = await db.query('SELECT nombre, telefono, correo FROM Usuario WHERE id = ?', [userId]);
     console.log("ROWS:", rows);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Como la tabla Usuario no tiene campo telefono, devolvemos solo el correo
-    // El frontend puede manejar el caso donde telefono es null
     const result = {
       correo: rows[0].correo,
-      telefono: null, // Indicamos explícitamente que no hay teléfono disponible
+      telefono: rows[0].telefono, 
       nombre: rows[0].nombre
     };
 
