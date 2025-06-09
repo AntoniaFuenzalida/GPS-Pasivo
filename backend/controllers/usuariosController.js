@@ -110,5 +110,23 @@ const registerUser = async (req, res) => {
     }
 };
 
+const obtenerContacto = async (req, res) => {
+  const userId = req.params.id;
 
-module.exports = { registerUser, getUsers , loginUser , updateUser};
+  try {
+    const [rows] = await db.query('SELECT telefono, correo FROM Usuario WHERE id = ?', [userId]);
+    console.log("ROWS:", rows);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener el contacto del usuario' });
+  }
+};
+
+
+
+module.exports = { registerUser, getUsers , loginUser , updateUser, obtenerContacto };

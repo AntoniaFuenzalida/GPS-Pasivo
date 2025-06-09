@@ -8,7 +8,9 @@ const {
   obtenerMascotaPorId,
   eliminarMascota,
   editarMascota,
-  obtenerMascotasPorDueno
+  obtenerMascotasPorDueno,
+  obtenerComentariosPorMascota,
+  obtenerUltimaUbicacionPorMascota
 } = require('../controllers/mascotaController');
 
 // Rutas con prefijo relativo "/mascotas"
@@ -18,5 +20,8 @@ router.get('/mascotas/obtener/:id', obtenerMascotaPorId);
 router.delete('/mascotas/eliminar/:id', eliminarMascota);
 router.put('/mascotas/editar/:id', editarMascota);
 router.get('/mascotas/dueno/:id_dueno', obtenerMascotasPorDueno); 
+router.get('/mascotas/comentarios/:id_mascota', obtenerComentariosPorMascota);
+router.get('/mascotas/ubicacion/:id_mascota', obtenerUltimaUbicacionPorMascota);
+
 
 module.exports = router;

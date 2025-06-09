@@ -1,6 +1,6 @@
 import React from "react";
 
-const PetHeader = ({ fotoUrl, nombre, tipo, raza, edad }) => (
+const PetHeader = ({ fotoUrl, nombre, descripcion}) => (
   <div className="relative h-48 bg-gray-200">
     {fotoUrl ? (
       <img
@@ -16,7 +16,7 @@ const PetHeader = ({ fotoUrl, nombre, tipo, raza, edad }) => (
     <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black to-transparent p-4">
       <h1 className="text-2xl font-bold text-white">{nombre}</h1>
       <p className="text-sm text-gray-200">
-        {tipo} · {raza} · {edad}
+        {descripcion ? descripcion : "No hay descripción disponible"}
       </p>
     </div>
   </div>

@@ -2,7 +2,13 @@ import React from "react";
 import { FiPhone, FiMail, FiMessageSquare } from "react-icons/fi";
 
 const OwnerContactCard = ({ contacto }) => {
-  const { nombreDueno, telefono, correo, whatsapp } = contacto;
+  const { nombreDueno, telefono, correo} = contacto;
+
+  // Función auxiliar para asegurar que telefono sea un string
+  const formatTelefono = (tel) => {
+    if (tel === null || tel === undefined) return "";
+    return String(tel); // Convertir a string
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm animate-fadeIn">
@@ -15,10 +21,10 @@ const OwnerContactCard = ({ contacto }) => {
         {/* Botón Llamar */}
         {telefono && (
           <a
-            href={`tel:${telefono}`}
+            href={`tel:${formatTelefono(telefono)}`}
             className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition"
           >
-            <FiPhone className="text-lg" /> {telefono}
+            <FiPhone className="text-lg" /> {formatTelefono(telefono)}
           </a>
         )}
 
@@ -33,9 +39,9 @@ const OwnerContactCard = ({ contacto }) => {
         )}
 
         {/* Botón WhatsApp */}
-        {whatsapp && (
+        {telefono && (
           <a
-            href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
+            href={`https://wa.me/${formatTelefono(telefono).replace(/\D/g, "")}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition"

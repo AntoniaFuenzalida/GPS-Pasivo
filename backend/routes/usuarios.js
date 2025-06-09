@@ -7,6 +7,7 @@ const {
   registerUser,
   loginUser,
   updateUser,
+  obtenerContacto
 } = require('../controllers/usuariosController');
 const verifyToken = require('../controllers/authMiddleware'); 
 const bcrypt = require('bcrypt');
@@ -17,6 +18,7 @@ const bcrypt = require('bcrypt');
 router.get('/users', getUsers);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+router.get('/usuarios/contacto/:id', obtenerContacto)
 
 // Rutas protegidas
 router.put('/update', verifyToken, updateUser);
