@@ -1,5 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+import { FiUsers, FiHome, FiMap, FiActivity } from "react-icons/fi";
+
+const COLORS = ["#4F46E5", "#EF4444"]; // azul para activos, rojo para inactivos
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -11,82 +26,127 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await axios.get("http://localhost:3001/api/estadisticas/totales");
+        const { data } = await axios.get(
+          "http://localhost:3001/api/estadisticas/totales"
+        );
         setStats(data);
       } catch (error) {
         console.error("Error al obtener estadísticas:", error);
       }
     };
-
     fetchStats();
   }, []);
 
-  const statsPrincipales = [
+  const activos = Math.floor(stats.totalUsuarios * 0.75);
+  const inactivos = stats.totalUsuarios - activos;
+
+  const summaryCards = [
     {
-      title: "Total Usuarios",
+      title: "Usuarios",
       value: stats.totalUsuarios,
-      change: "+12% desde el mes pasado",
+      icon: <FiUsers className="text-2xl text-indigo-500" />,
+      change: "+12% vs mes pasado",
     },
     {
-      title: "Total Mascotas",
+      title: "Mascotas",
       value: stats.totalMascotas,
-      change: "+18% desde el mes pasado",
+      icon: <FiHome className="text-2xl text-indigo-500" />,
+      change: "+18% vs mes pasado",
     },
     {
-      title: "Total Escaneos",
+      title: "Escaneos",
       value: stats.totalEscaneos,
-      change: "+24% desde el mes pasado",
+      icon: <FiMap className="text-2xl text-indigo-500" />,
+      change: "+24% vs mes pasado",
     },
     {
-      title: "Usuarios Activos",
-      value: Math.floor(stats.totalUsuarios * 0.75), // Suponiendo 75% activos
-      change: "+8% desde el mes pasado",
+      title: "Activos",
+      value: activos,
+      icon: <FiActivity className="text-2xl text-indigo-500" />,
+      change: "+8% vs mes pasado",
     },
   ];
 
-  return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
-      {/* Encabezado */}
-      <div className="mb-8 animate-fadeIn">
-        <h1 className="text-3xl font-extrabold">Panel de Administración</h1>
-        <p className="text-gray-600 mt-1">
-          Gestiona usuarios, mascotas y visualiza estadísticas del sistema
-        </p>
-      </div>
+  const barData = summaryCards.map((c) => ({
+    name: c.title,
+    value: c.value,
+  }));
 
-      {/* Estadísticas Principales */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 animate-fadeIn">
-        {statsPrincipales.map((stat, idx) => (
+  const pieData = [
+    { name: "Activos", value: activos },
+    { name: "Inactivos", value: inactivos },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900 px-6 py-8">
+      {/* Encabezado */}
+      <header className="mb-8 animate-fadeIn">
+        <h1 className="text-4xl font-extrabold">Panel de Administración</h1>
+        <p className="text-gray-600 mt-2">
+          Estadísticas generales y actividad del sistema
+        </p>
+      </header>
+
+      {/* Resumen rápido */}
+      <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 animate-fadeIn">
+        {summaryCards.map((card) => (
           <div
-            key={idx}
-            className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+            key={card.title}
+            className="flex items-center bg-white rounded-xl shadow p-5 hover:shadow-lg transition"
           >
-            <h3 className="text-sm text-gray-500">{stat.title}</h3>
-            <p className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</p>
-            <p className="text-sm text-green-600 mt-1">{stat.change}</p>
+            <div className="p-3 bg-indigo-100 rounded-full mr-4">
+              {card.icon}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">
+                {card.title}
+              </p>
+              <p className="text-2xl font-bold">{card.value}</p>
+              <p className="text-xs text-green-600 mt-1">{card.change}</p>
+            </div>
           </div>
         ))}
-      </div>
+      </section>
 
-      {/* Actividad Reciente */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 animate-fadeIn">
-        <h2 className="text-xl font-bold mb-2">Actividad Reciente</h2>
-        <p className="text-gray-600 mb-6">
-          Resumen de la actividad reciente del sistema
-        </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statsPrincipales.map((stat, idx) => (
-            <div
-              key={`recent-${idx}`}
-              className="bg-gray-50 rounded-lg border border-gray-200 p-5 hover:bg-white transition-colors"
-            >
-              <h3 className="text-sm text-gray-500">{stat.title}</h3>
-              <p className="text-2xl font-bold text-gray-800 mt-2">{stat.value}</p>
-              <p className="text-sm text-green-600 mt-1">{stat.change}</p>
-            </div>
-          ))}
+      {/* Gráficos */}
+      <section className="grid lg:grid-cols-2 gap-8">
+        {/* Bar Chart */}
+        <div className="bg-white rounded-xl shadow p-6 animate-fadeIn">
+          <h2 className="text-xl font-semibold mb-4">Totales</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={barData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+              <XAxis dataKey="name" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
+              <Tooltip />
+              <Bar dataKey="value" fill="#4F46E5" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-      </div>
+
+        {/* Pie Chart */}
+        <div className="bg-white rounded-xl shadow p-6 animate-fadeIn">
+          <h2 className="text-xl font-semibold mb-4">Usuarios Activos vs Inactivos</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={entry.name} fill={COLORS[index]} />
+                ))}
+              </Pie>
+              <Legend verticalAlign="bottom" height={36} />
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
     </div>
   );
 };
