@@ -16,6 +16,7 @@ import AdminUsuarios from "./pages/AdminUsuarios";
 import AdminMascotas from "./pages/AdminMascotas";
 import AdminEscaneos from "./pages/AdminEscaneos";
 import AdminLayout from "./layouts/AdminLayout"; // asegúrate de tener este archivo
+import Perfil from "./pages/Perfil"
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/notificaciones" element={<Notifications />} />
         <Route path="/mapa" element={<MapPage />} />
         <Route path="/mapatest" element={<MapTest />} />
+        <Route path="/perfil" element={<Perfil />} />
 
         {/* Vista de invitado para ver datos de la mascota al escanear el QR */}
         <Route path="/pet/:id" element={<GuestPetView />} />

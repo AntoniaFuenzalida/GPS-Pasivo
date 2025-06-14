@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FiMail, FiSmartphone, FiBellOff } from "react-icons/fi";
+import { FiMail, FiSmartphone, FiBellOff, FiUser } from "react-icons/fi";
 
 const Notifications = () => {
   const [emailEnabled, setEmailEnabled] = useState(false);
@@ -24,7 +24,10 @@ const Notifications = () => {
     <div className="min-h-screen bg-gray-100 text-gray-900">
       {/* Navbar */}
       <header className="bg-white shadow-md px-8 py-4 flex justify-between items-center animate-fadeIn">
-        <Link to="/" className="text-2xl font-bold text-red-600 flex items-center gap-2">
+        <Link
+          to="/"
+          className="text-2xl font-bold text-red-600 flex items-center gap-2"
+        >
           🐾 MascotasID
         </Link>
         <nav className="flex space-x-6 font-medium text-gray-700">
@@ -38,14 +41,37 @@ const Notifications = () => {
             Notificaciones
           </Link>
         </nav>
-        <div className="w-8 h-8 bg-gray-300 rounded-full" />
+        <div className="flex items-center gap-4">
+          
+          {/* Dejé enlazado el ícono de perfil a la vista */}
+          <Link 
+            to="/perfil" 
+            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors group"
+            title="Mi Perfil"
+          >
+            <FiUser className="w-5 h-5 text-gray-600 group-hover:text-red-600 transition-colors" />
+          </Link>
+
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("usuario");
+              window.location.href = "/login";
+            }}
+            className="text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </header>
 
       {/* Contenido */}
       <main className="px-8 py-10">
         {/* Encabezado de sección */}
         <div className="mb-8 animate-fadeIn max-w-2xl mx-auto">
-          <h1 className="text-3xl font-extrabold">Configuración de Notificaciones</h1>
+          <h1 className="text-3xl font-extrabold">
+            Configuración de Notificaciones
+          </h1>
           <p className="text-gray-600 mt-1">
             Configura cómo deseas recibir alertas de escaneos de tus mascotas
           </p>
@@ -59,9 +85,12 @@ const Notifications = () => {
               <div className="flex items-center gap-3">
                 <FiMail className="text-2xl text-red-600" />
                 <div>
-                  <h2 className="text-lg font-semibold">Notificaciones por Correo</h2>
+                  <h2 className="text-lg font-semibold">
+                    Notificaciones por Correo
+                  </h2>
                   <p className="text-gray-500 text-sm">
-                    Recibe alertas por correo cuando se escanee el código QR de tu mascota.
+                    Recibe alertas por correo cuando se escanee el código QR de
+                    tu mascota.
                   </p>
                 </div>
               </div>
@@ -104,7 +133,8 @@ const Notifications = () => {
                 <div>
                   <h2 className="text-lg font-semibold">Notificaciones SMS</h2>
                   <p className="text-gray-500 text-sm">
-                    Recibe mensajes de texto cuando se escanee el código QR de tu mascota.
+                    Recibe mensajes de texto cuando se escanee el código QR de
+                    tu mascota.
                   </p>
                 </div>
               </div>
