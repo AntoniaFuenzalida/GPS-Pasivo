@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser, getMe } from "../services/authService";
 
@@ -28,9 +28,13 @@ const Login = () => {
 
       // 4. Redirigir al dashboard
       navigate("/dashboard");
+      if (usuario.tipo === "administrador") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
-      console.error("❌ Error de login:", err.response?.data || err.message);
-      setError(err.response?.data?.error || "Error al iniciar sesión");
+      setError("Correo o contraseña incorrectos.");
     }
   };
 
