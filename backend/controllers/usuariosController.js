@@ -83,42 +83,48 @@ const registerUser = async (req, res) => {
   };
 
   
-  const updateUser = async (req, res) => {
-    const userId = req.user.id;
-    const { nombre, correo, contrasena } = req.body;
+const updateUser = async (req, res) => {
+  const userId = req.user.id;
+  const { nombre, correo, contrasena, telefono } = req.body;
 
-    try {
-      let query = 'UPDATE Usuario SET';
-      const params = [];
-      
-      if (nombre) {
-        query += ' nombre = ?,';
-        params.push(nombre);
-      }
+  try {
+    let query = 'UPDATE Usuario SET';
+    const params = [];
 
-      if (correo) {
-        query += ' correo = ?,';
-        params.push(correo);
-      }
-
-      if (contrasena) {
-        const hashed = await bcrypt.hash(contrasena, 10);
-        query += ' contrasena = ?,';
-        params.push(hashed);
-      }
-
-      query = query.slice(0, -1);
-      query += ' WHERE id = ?';
-      params.push(userId);
-
-      await db.query(query, params);
-
-      res.json({ message: 'Usuario actualizado correctamente' });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error al actualizar el usuario' });
+    if (nombre) {
+      query += ' nombre = ?,';
+      params.push(nombre);
     }
+
+    if (correo) {
+      query += ' correo = ?,';
+      params.push(correo);
+    }
+
+    if (telefono) {
+      query += ' telefono = ?,';
+      params.push(telefono);
+    }
+
+    if (contrasena) {
+      const hashed = await bcrypt.hash(contrasena, 10);
+      query += ' contrasena = ?,';
+      params.push(hashed);
+    }
+
+    query = query.slice(0, -1); // Quita la coma final
+    query += ' WHERE id = ?';
+    params.push(userId);
+
+    await db.query(query, params);
+
+    res.json({ message: 'Usuario actualizado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al actualizar el usuario' });
+  }
 };
+
 
 const obtenerContacto = async (req, res) => {
   const userId = req.params.id;
@@ -173,7 +179,30 @@ const eliminarUsuario = async (req, res) => {
 };
 
 
+const cambiarContrasena = async (req, res) => {
+  const { actual, nueva } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const [rows] = await db.query('SELECT contrasena FROM Usuario WHERE id = ?', [userId]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    const coincide = await bcrypt.compare(actual, rows[0].contrasena);
+    if (!coincide) return res.status(400).json({ error: 'Contraseña actual incorrecta' });
+
+    const hashedNueva = await bcrypt.hash(nueva, 10);
+    await db.query('UPDATE Usuario SET contrasena = ? WHERE id = ?', [hashedNueva, userId]);
+
+    res.json({ message: 'Contraseña actualizada correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al actualizar la contraseña' });
+  }
+};
 
 
 
-module.exports = { registerUser, getUsers , loginUser , updateUser, obtenerContacto, eliminarUsuario};
+
+
+
+module.exports = { registerUser, getUsers , loginUser , updateUser, obtenerContacto, eliminarUsuario, cambiarContrasena};

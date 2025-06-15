@@ -8,7 +8,8 @@ const {
   loginUser,
   updateUser,
   obtenerContacto,
-  eliminarUsuario
+  eliminarUsuario,
+  cambiarContrasena
 } = require('../controllers/usuariosController');
 
 const verifyToken = require('../controllers/authMiddleware'); 
@@ -48,28 +49,7 @@ router.get('/me', verifyToken, async (req, res) => {
 
 
 
-router.put('/cambiar-contrasena', verifyToken, async (req, res) => {
-  console.log("Ruta cambiar-contrasena activa");
-
-  const { actual, nueva } = req.body;
-  const userId = req.user.id;
-
-  try {
-    const [rows] = await db.query('SELECT contrasena FROM Usuario WHERE id = ?', [userId]); 
-    if (rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
-
-    const coincide = await bcrypt.compare(actual, rows[0].contrasena);
-    if (!coincide) return res.status(400).json({ error: 'Contraseña actual incorrecta' });
-
-    const hashedNueva = await bcrypt.hash(nueva, 10);
-    await db.query('UPDATE Usuario SET contrasena = ? WHERE id = ?', [hashedNueva, userId]);
-
-    res.json({ message: 'Contraseña actualizada correctamente' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al actualizar la contraseña' });
-  }
-});
+router.put('/cambiar-contrasena', verifyToken, cambiarContrasena);
 
 
 

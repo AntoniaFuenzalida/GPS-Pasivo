@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FiUser, FiLock, FiPhone, FiSave } from "react-icons/fi";
+import { FiUser, FiLock, FiSave } from "react-icons/fi";
+import { actualizarPerfil, cambiarContrasena } from "../services/usuarioService";
 
 const Profile = () => {
   const [usuario, setUsuario] = useState(null);
@@ -40,7 +41,49 @@ const Profile = () => {
   };
 
   const handleSubmit = async (e) => {
-      // Aquí se harian las llamadas al backend, pero me centré solo en hacer front
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+
+    try {
+      // Validación de contraseña nueva
+      if (
+        formData.contrasenaNueva &&
+        formData.contrasenaNueva !== formData.confirmarContrasena
+      ) {
+        setError("Las contraseñas no coinciden");
+        setLoading(false);
+        return;
+      }
+
+      //Actualizar nombre y teléfono
+      await actualizarPerfil({
+        nombre: formData.nombre,
+        telefono: formData.telefono,
+      });
+
+      //Cambiar contraseña (si se llenó)
+      if (formData.contrasenaActual && formData.contrasenaNueva) {
+        await cambiarContrasena({
+          actual: formData.contrasenaActual,
+          nueva: formData.contrasenaNueva,
+        });
+      }
+
+      setSuccess("Perfil actualizado correctamente");
+
+      // Actualizar también en localStorage
+      const usuarioActualizado = JSON.parse(localStorage.getItem("usuario"));
+      usuarioActualizado.nombre = formData.nombre;
+      usuarioActualizado.telefono = formData.telefono;
+      localStorage.setItem("usuario", JSON.stringify(usuarioActualizado));
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.error || "Error al actualizar perfil");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!usuario) {
