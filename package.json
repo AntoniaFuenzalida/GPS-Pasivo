@@ -22,8 +22,8 @@
     "mqtt": "^5.11.1",
     "mysql2": "^3.14.1",
     "react-map-gl": "^8.0.4",
-    "recharts": "^2.15.3",
     "react-qr-code": "^2.0.15",
+    "recharts": "^2.15.3",
     "tablero-2.0": "file:"
   }
 }

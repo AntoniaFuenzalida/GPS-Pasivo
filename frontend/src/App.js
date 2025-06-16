@@ -75,14 +75,20 @@ function App() {
           }
         />
 
-        {/* Rutas administrativas sin protección */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Rutas protegidas administrativas */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="usuarios" element={<AdminUsuarios />} />
           <Route path="mascotas" element={<AdminMascotas />} />
           <Route path="escaneos" element={<AdminEscaneos />} />
         </Route>
-
 
         {/* ❌ Ruta no encontrada (404) opcional */}
         <Route path="*" element={<div>Página no encontrada</div>} />
