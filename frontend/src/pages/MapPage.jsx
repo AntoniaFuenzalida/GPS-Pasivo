@@ -62,7 +62,8 @@ const MapPage = () => {
 const fetchMascotas = async () => {
   try {
     // Obtener mascotas
-    const responseMascotas = await fetch("http://localhost:3001/api/mascotas/obtener"); //cambiar por ruta de buscar por dueño si es necesario
+    const responseMascotas = await fetch("http://localhost:3001/api/mascotas/obtener"); //si es administrador usa este
+    //const responseMascotas = await fetch("http://localhost:3001/api/mascotas/dueno/" + 9 ); // si es usuario dueno esa su id (ejemplo id: 9)
     if (!responseMascotas.ok) {
       throw new Error("Error al obtener las mascotas");
     }
