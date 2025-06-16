@@ -14,7 +14,7 @@ import {
 const UserDashboard = () => {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const idDueno = usuario?.id;
-  const nombreDueno = usuario?.nombre || "Usuario";
+  //const nombreDueno = usuario?.nombre || "Usuario";
 
   const [mascotas, setMascotas] = useState([]);
   const [busqueda, setBusqueda] = useState("");
