@@ -8,7 +8,7 @@ const QrModal = ({ visible, onClose, mascota }) => {
   if (!visible || !mascota) return null;
   
   // Generar el valor del QR con la URL de la mascota
-  const qrValue = `http://34.67.77.73:4000/track?id=${mascota.id}`;
+  const qrValue = `https://gpspasivogpt.twilightparadox.com/geolocate.html?id=${mascota.id}`;
   
 
   // Descargar QR como imagen PNG
