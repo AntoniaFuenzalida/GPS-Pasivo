@@ -2,53 +2,48 @@ const db = require('../db');
 
 const obtenerLocalizaciones = async (req, res) => {
     try {
-        let [localizaciones] = [];
-        [localizaciones] = await db.query('SELECT * FROM Localizacion');
-
-        res.status(201).json({localizaciones: [localizaciones]})
+        const [localizaciones] = await db.query('SELECT * FROM Localizacion');
+        res.status(200).json({ localizaciones });
     } catch (error) {
-        console.error('Error al encontrar todas las localizaciones')
-        res.status(500).json({error: 'Error interno en el servidor al obtener localizaciones'})
+        console.error('Error al encontrar todas las localizaciones');
+        res.status(500).json({ error: 'Error interno en el servidor al obtener localizaciones' });
     }
 }
 
 const obtenerLocalizacionesPorDueno = async (req, res) => {
-    const {id_dueno} = req.params;
-    if (!id_dueno){
-        return res.status(400).json({ error: 'El id_dueno no encontrado'})
+    const { id_dueno } = req.params;
+    if (!id_dueno) {
+        return res.status(400).json({ error: 'El id_dueno no encontrado' });
     }
     try {
-        let [localizaciones] = [];
-        [localizaciones] = await db.query('SELECT nombre, mascota_id, latitud, longitud, fecha FROM Mascota INNER JOIN Localizacion WHERE id_dueno = ?', [id_dueno])
-        if (localizaciones.lenght === 0){
-            return res.status(200).json({localizaciones: [localizaciones]});
-        }
-
-        res.status(200).json({localizaciones: [localizaciones]});
-
+        const [localizaciones] = await db.query(
+            'SELECT nombre, mascota_id, latitud, longitud, fecha FROM Mascota INNER JOIN Localizacion WHERE id_dueno = ?',
+            [id_dueno]
+        );
+        res.status(200).json({ localizaciones });
     } catch (error) {
         console.error('Error al encontrar las localizaciones por dueno');
-        res.status(500).json({error: 'Error interno en el servidor al encontrar localizaciobnes por dueno'})
+        res.status(500).json({ error: 'Error interno en el servidor al encontrar localizaciones por dueno' });
     }
 }
 
 const obtenerLocalizacionesPorMascota = async (req, res) => {
-    const {id_mascota} = req.params;
-    if (!id_mascota){
-        return res.status(400).json({ error: 'El id_mascota no encontrado'})
+    const { id_mascota } = req.params;
+    if (!id_mascota) {
+        return res.status(400).json({ error: 'El id_mascota no encontrado' });
     }
     try {
-        let [localizaciones] = [];
-        [localizaciones] = await db.query('SELECT nombre, mascota_id, latitud, longitud, fecha FROM Mascota INNER JOIN Localizacion WHERE mascota_id = ?', [id_mascota])
-        if (localizaciones.lenght === 0){
-            return res.status(200).json({localizaciones: [localizaciones]});
-        }
-
-        res.status(200).json({localizaciones: [localizaciones]});
-
+        const [localizaciones] = await db.query(
+            `SELECT nombre, Mascota.id as mascota_id, latitud, longitud, fecha
+            FROM Mascota
+            INNER JOIN Localizacion ON Mascota.id = Localizacion.mascota_id
+            WHERE mascota_id = ?`,
+            [id_mascota]
+        );
+        res.status(200).json({ localizaciones });
     } catch (error) {
         console.error('Error al encontrar las localizaciones por mascota');
-        res.status(500).json({error: 'Error interno en el servidor al encontrar localizaciobnes por mascota'})
+        res.status(500).json({ error: 'Error interno en el servidor al encontrar localizaciones por mascota' });
     }
 }
 

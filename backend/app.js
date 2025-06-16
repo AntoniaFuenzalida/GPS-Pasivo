@@ -16,6 +16,6 @@ const localizacionRoutes = require('./routes/localizacion');
 
 app.use('/api', userRoutes);      
 app.use('/api/mascotas', mascotaRoutes);  
-app.use('/api', localizacionRoutes); 
+app.use('/api/localizaciones', localizacionRoutes); 
 
 module.exports = app;

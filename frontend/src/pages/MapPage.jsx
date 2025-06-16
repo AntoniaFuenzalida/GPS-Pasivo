@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, use} from "react";
 import { Link } from "react-router-dom";
 import { BsChatLeftText } from "react-icons/bs";
 import { FiUser } from "react-icons/fi";
@@ -6,7 +6,8 @@ import CommentModal from "../components/CommentModal";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const ubicaciones = [
+
+const ubicaciones1 = [
   {
     nombre: "Max",
     lugar: "Parque Central",
@@ -51,7 +52,84 @@ const MapPage = () => {
   const mapInstance = useRef(null);
   const [popup, setPopup] = useState(null);
 
-  const mascotasUnicas = [...new Set(ubicaciones.map((u) => u.nombre))];
+  const [mascotasUnicas, setMascotasUnicas] = useState([]);
+
+  // datos de la API
+  const [mascotas, setMascotas] = useState([]);
+  const [ubicaciones, setUbicaciones] = useState([]);
+  const [comentarios, setComentarios] = useState([]);
+
+const fetchMascotas = async () => {
+  try {
+    // Obtener mascotas
+    const responseMascotas = await fetch("http://localhost:3001/api/mascotas/obtener");
+    if (!responseMascotas.ok) {
+      throw new Error("Error al obtener las mascotas");
+    }
+    const dataMascotas = await responseMascotas.json();
+    setMascotas(dataMascotas);
+
+    // Obtener ubicaciones de todas las mascotas en paralelo
+    const ubicacionesPromises = dataMascotas.map(async (mascota) => {
+      const responseLocalizaciones = await fetch(
+        "http://localhost:3001/api/localizaciones/mascota/" + mascota.id
+      );
+      if (!responseLocalizaciones.ok) {
+        return []; // Si falla, retorna vacío
+      }
+      const dataLocalizaciones = await responseLocalizaciones.json();
+      if (dataLocalizaciones.localizaciones && dataLocalizaciones.localizaciones.length > 0) {
+        return dataLocalizaciones.localizaciones.map((u) => {
+          // Formatear la fecha como "27/4/2025, 6:15:00"
+          let fechaFormateada = u.fecha;
+          if (u.fecha) {
+            const fechaObj = new Date(u.fecha);
+            const dia = fechaObj.getDate();
+            const mes = fechaObj.getMonth() + 1;
+            const anio = fechaObj.getFullYear();
+            const horas = fechaObj.getHours();
+            const minutos = fechaObj.getMinutes().toString().padStart(2, "0");
+            const segundos = fechaObj.getSeconds().toString().padStart(2, "0");
+            fechaFormateada = `${dia}/${mes}/${anio}, ${horas}:${minutos}:${segundos}`;
+          } else {
+            fechaFormateada = new Date().toLocaleString("es-ES");
+          }
+
+          return {
+            nombre: mascota.nombre,
+            lugar: `${u.longitud},${u.latitud}`,
+            coords: [u.longitud, u.latitud],
+            fecha: fechaFormateada,
+            comentario: u.comentario ? true : false,
+            comentarioTexto: u.comentarioTexto || "",
+          };
+        });
+      }
+      return [];
+    });
+
+    // Espera a que todas las promesas terminen
+    const ubicacionesArray = await Promise.all(ubicacionesPromises);
+    // Junta todos los arrays en uno solo
+    const todasUbicaciones = ubicacionesArray.flat();
+
+    setUbicaciones(todasUbicaciones);
+    // agregar ubcaciones a varible ubicaciones
+  } catch (error) {
+    console.error("Error fetching mascotas:", error);
+  }
+};
+
+
+useEffect(() => {
+  fetchMascotas();
+}, []);
+
+useEffect(() => {
+  setMascotasUnicas([...new Set(ubicaciones.map((u) => u.nombre))]);
+}, [ubicaciones]);
+
+
 
   const ubicacionesFiltradas =
     filtro === "Todas"
