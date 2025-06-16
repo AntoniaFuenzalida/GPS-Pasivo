@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FiEdit, FiTrash2, FiSearch } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiSearch, FiUser } from "react-icons/fi";
 import { BiQrScan } from "react-icons/bi";
 import AddOrEditPetModal from "../components/AddOrEditPetModal";
 import QrModal from "../components/QrModal";
@@ -14,7 +14,7 @@ import {
 const UserDashboard = () => {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const idDueno = usuario?.id;
-  const nombreDueno = usuario?.nombre || "Usuario";
+  //const nombreDueno = usuario?.nombre || "Usuario";
 
   const [mascotas, setMascotas] = useState([]);
   const [busqueda, setBusqueda] = useState("");
@@ -65,12 +65,21 @@ const UserDashboard = () => {
           🐾 MascotasID
         </Link>
         <nav className="flex space-x-6 font-medium text-gray-700">
-          <Link to="/dashboard" className="hover:text-red-600">Panel de Control</Link>
+          <Link to="/dashboard" className="text-red-600 border-b-2 border-red-600 pb-1">Panel de Control</Link>
           <Link to="/mapa" className="hover:text-red-600">Mapa</Link>
           <Link to="/notificaciones" className="hover:text-red-600">Notificaciones</Link>
         </nav>
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-gray-700">👋 {nombreDueno}</span>
+          
+          {/* Dejé enlazado el ícono de perfil a la vista  */}
+          <Link 
+            to="/perfil" 
+            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors group"
+            title="Mi Perfil"
+          >
+            <FiUser className="w-5 h-5 text-gray-600 group-hover:text-red-600 transition-colors" />
+          </Link>
+
           <button
             onClick={() => {
               localStorage.removeItem("token");

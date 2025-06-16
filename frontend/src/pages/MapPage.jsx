@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BsChatLeftText } from "react-icons/bs";
+import { FiUser } from "react-icons/fi";
 import CommentModal from "../components/CommentModal";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -87,13 +88,15 @@ const MapPage = () => {
 
           const newPopup = new maplibregl.Popup({ offset: 25 })
             .setLngLat(u.coords)
-            .setHTML(`
+            .setHTML(
+              `
               <div class="font-sans text-sm">
                 <h3 class="font-bold">${u.nombre}</h3>
                 <p>${u.lugar}</p>
                 <p class="text-xs text-gray-600">${u.fecha}</p>
               </div>
-            `)
+            `
+            )
             .addTo(map);
 
           setPopup(newPopup);
@@ -113,21 +116,44 @@ const MapPage = () => {
     <div className="min-h-screen bg-gray-100 text-gray-900">
       {/* Navbar */}
       <header className="flex justify-between items-center px-8 py-4 bg-white shadow-md animate-fadeIn">
-        <Link to="/" className="text-2xl font-bold text-red-600 flex items-center gap-2">
+        <Link
+          to="/"
+          className="text-2xl font-bold text-red-600 flex items-center gap-2"
+        >
           🐾 MascotasID
         </Link>
         <nav className="flex space-x-6 font-medium text-gray-700">
           <Link to="/dashboard" className="hover:text-red-600">
             Panel de Control
           </Link>
-          <Link to="/mapa" className="hover:text-red-600 font-semibold">
+          <Link to="/mapa" className="text-red-600 border-b-2 border-red-600 pb-1">
             Mapa
           </Link>
           <Link to="/notificaciones" className="hover:text-red-600">
             Notificaciones
           </Link>
         </nav>
-        <div className="w-8 h-8 bg-gray-300 rounded-full" />
+        <div className="flex items-center gap-4">
+          {/* Dejé enlazado el ícono de perfil a la vista  */}
+          <Link
+            to="/perfil"
+            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors group"
+            title="Mi Perfil"
+          >
+            <FiUser className="w-5 h-5 text-gray-600 group-hover:text-red-600 transition-colors" />
+          </Link>
+
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("usuario");
+              window.location.href = "/login";
+            }}
+            className="text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </header>
 
       {/* Contenido */}
@@ -148,7 +174,9 @@ const MapPage = () => {
           {/* Historial lateral */}
           <div className="md:w-1/3 flex flex-col gap-4 animate-fadeIn">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Últimas ubicaciones</h3>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Últimas ubicaciones
+              </h3>
               <select
                 value={filtro}
                 onChange={(e) => setFiltro(e.target.value)}
@@ -184,7 +212,9 @@ const MapPage = () => {
                       <button
                         className="text-blue-600 hover:underline text-sm font-medium flex items-center gap-1"
                         onClick={() => {
-                          setComentarioActivo(u.comentarioTexto || "Sin detalles");
+                          setComentarioActivo(
+                            u.comentarioTexto || "Sin detalles"
+                          );
                           setModalVisible(true);
                         }}
                       >
