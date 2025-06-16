@@ -62,7 +62,7 @@ const MapPage = () => {
 const fetchMascotas = async () => {
   try {
     // Obtener mascotas
-    const responseMascotas = await fetch("http://localhost:3001/api/mascotas/obtener");
+    const responseMascotas = await fetch("http://localhost:3001/api/mascotas/obtener"); //cambiar por ruta de buscar por dueño si es necesario
     if (!responseMascotas.ok) {
       throw new Error("Error al obtener las mascotas");
     }
@@ -120,6 +120,22 @@ const fetchMascotas = async () => {
   }
 };
 
+const ajustarMapa = () => {
+  if (!mapInstance.current) return;
+  if (ubicacionesFiltradas.length === 0) return;
+
+  const bounds = new maplibregl.LngLatBounds();
+  ubicacionesFiltradas.forEach((u) => {
+    bounds.extend(u.coords);
+  });
+
+  mapInstance.current.fitBounds(bounds, {
+    padding: 60,
+    maxZoom: 15,
+    duration: 1000,
+  });
+};
+
 
 useEffect(() => {
   fetchMascotas();
@@ -129,12 +145,37 @@ useEffect(() => {
   setMascotasUnicas([...new Set(ubicaciones.map((u) => u.nombre))]);
 }, [ubicaciones]);
 
-
-
   const ubicacionesFiltradas =
     filtro === "Todas"
       ? ubicaciones
       : ubicaciones.filter((u) => u.nombre === filtro);
+
+useEffect(() => {
+  ajustarMapa();
+  // eslint-disable-next-line
+}, [ubicacionesFiltradas, mapInstance.current]);
+
+
+
+  useEffect(() => {
+    if (!mapContainer.current || mapInstance.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainer.current,
+      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      center: [-3.7038, 40.4168],
+      zoom: 13,
+    });
+
+    mapInstance.current = map;
+
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -189,6 +230,60 @@ useEffect(() => {
       }
     };
   }, [popup, ubicacionesFiltradas]); // ✅ Dependencias corregidas
+
+  useEffect(() => {
+    if (!mapInstance.current) return;
+
+    // Limpia los marcadores anteriores
+    if (mapInstance.current.markers) {
+      mapInstance.current.markers.forEach((m) => m.remove());
+    }
+    mapInstance.current.markers = [];
+
+    // Agrega los nuevos marcadores
+    ubicacionesFiltradas.forEach((u) => {
+      const el = document.createElement("div");
+      el.className = "text-2xl cursor-pointer";
+      el.innerText = "📍";
+
+      const marker = new maplibregl.Marker(el).setLngLat(u.coords).addTo(mapInstance.current);
+
+      if (u.comentario) {
+        el.onclick = () => {
+          if (popup) popup.remove();
+
+          const newPopup = new maplibregl.Popup({ offset: 25 })
+            .setLngLat(u.coords)
+            .setHTML(
+              `
+              <div class="font-sans text-sm">
+                <h3 class="font-bold">${u.nombre}</h3>
+                <p>${u.lugar}</p>
+                <p class="text-xs text-gray-600">${u.fecha}</p>
+              </div>
+            `
+            )
+            .addTo(mapInstance.current);
+
+          setPopup(newPopup);
+        };
+      }
+
+      mapInstance.current.markers.push(marker);
+    });
+
+    // Ajusta el mapa a los puntos filtrados
+    if (ubicacionesFiltradas.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      ubicacionesFiltradas.forEach((u) => bounds.extend(u.coords));
+      mapInstance.current.fitBounds(bounds, {
+        padding: 60,
+        maxZoom: 15,
+        duration: 1000,
+      });
+    }
+
+  }, [ubicacionesFiltradas, popup]);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
