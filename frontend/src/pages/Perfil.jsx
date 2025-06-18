@@ -181,7 +181,7 @@ const Profile = () => {
                       name="telefono"
                       value={formData.telefono}
                       onChange={handleChange}
-                      placeholder="Ej: +57 300 123 4567"
+                      placeholder="Ej: 9 1234 5678"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                     />
                   </div>
