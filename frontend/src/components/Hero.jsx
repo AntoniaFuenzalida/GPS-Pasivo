@@ -1,4 +1,5 @@
 import React from "react";
+import landingImage from "../assets/landing-illustration.png";
 
 const Hero = () => {
   return (
@@ -20,9 +21,11 @@ const Hero = () => {
         </div>
       </div>
       <div className="md:w-1/2 mt-10 md:mt-0 flex justify-center">
-        <div className="bg-gray-200 w-80 h-80 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-          Imagen o animación aquí
-        </div>
+        <img
+          src={landingImage}
+          alt="Ilustración de mascotas con QR"
+          className="w-80 h-80 object-contain"
+        />
       </div>
     </section>
   );
