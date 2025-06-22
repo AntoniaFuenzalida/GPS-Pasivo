@@ -18,6 +18,10 @@ export const crearMascota = async (mascota) => {
     const response = await axios.post(`${API_URL}/crear`, {
       nombre: mascota.nombre,
       descripcion: mascota.descripcion || "",
+      tipo: mascota.tipo || "",
+      raza: mascota.raza || "",
+      edad: mascota.edad || "",
+      alergias: mascota.alergias || "",
       id_dueno: mascota.id_dueno,
     });
     console.log("📤 Mascota enviada:", mascota);
@@ -32,6 +36,10 @@ export const editarMascota = async (id, mascota) => {
   const response = await axios.put(`${API_URL}/editar/${id}`, {
     nombre: mascota.nombre,
     descripcion: mascota.descripcion || "",
+    tipo: mascota.tipo || "",
+    raza: mascota.raza || "",
+    edad: mascota.edad || "",
+    alergias: mascota.alergias || "",
   });
   return response.data;
 };

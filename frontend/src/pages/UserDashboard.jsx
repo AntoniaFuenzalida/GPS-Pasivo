@@ -130,10 +130,6 @@ const UserDashboard = () => {
             >
               <h3 className="text-xl font-semibold text-gray-800">{mascota.nombre}</h3>
               <p className="mt-1 text-gray-600">{mascota.tipo || "Tipo desconocido"} · {mascota.raza || "Raza desconocida"}</p>
-              <div className="mt-4 text-gray-700">
-                <p>Total de Escaneos: {mascota.escaneos ?? 0}</p>
-                <p>Último Escaneo: {mascota.ultimo ?? "Sin registro"}</p>
-              </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
@@ -189,6 +185,10 @@ const UserDashboard = () => {
                         ...m,
                         nombre: nuevaMascota.nombre,
                         descripcion: nuevaMascota.descripcion,
+                        tipo: nuevaMascota.tipo,
+                        raza: nuevaMascota.raza,
+                        edad: nuevaMascota.edad,
+                        alergias: nuevaMascota.alergias,
                       }
                     : m
                 )
@@ -206,8 +206,6 @@ const UserDashboard = () => {
                 {
                   ...nuevaMascota,
                   id: response.id,
-                  escaneos: 0,
-                  ultimo: new Date().toLocaleString(),
                 },
               ]);
             }
