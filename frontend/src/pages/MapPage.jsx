@@ -59,67 +59,66 @@ const MapPage = () => {
   const [ubicaciones, setUbicaciones] = useState([]);
   const [comentarios, setComentarios] = useState([]);
 
-const fetchMascotas = async () => {
-  try {
-    // Obtener mascotas
-    const responseMascotas = await fetch("http://localhost:3001/api/mascotas/obtener"); //si es administrador usa este
-    //const responseMascotas = await fetch("http://localhost:3001/api/mascotas/dueno/" + 9 ); // si es usuario dueno esa su id (ejemplo id: 9)
-    if (!responseMascotas.ok) {
-      throw new Error("Error al obtener las mascotas");
-    }
-    const dataMascotas = await responseMascotas.json();
-    setMascotas(dataMascotas);
+  const fetchMascotas = async () => {
+    try {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const token = localStorage.getItem("token");
 
-    // Obtener ubicaciones de todas las mascotas en paralelo
-    const ubicacionesPromises = dataMascotas.map(async (mascota) => {
-      const responseLocalizaciones = await fetch(
-        "http://localhost:3001/api/localizaciones/mascota/" + mascota.id
-      );
-      if (!responseLocalizaciones.ok) {
-        return []; // Si falla, retorna vacío
-      }
-      const dataLocalizaciones = await responseLocalizaciones.json();
-      if (dataLocalizaciones.localizaciones && dataLocalizaciones.localizaciones.length > 0) {
-        return dataLocalizaciones.localizaciones.map((u) => {
-          // Formatear la fecha como "27/4/2025, 6:15:00"
-          let fechaFormateada = u.fecha;
-          if (u.fecha) {
-            const fechaObj = new Date(u.fecha);
-            const dia = fechaObj.getDate();
-            const mes = fechaObj.getMonth() + 1;
-            const anio = fechaObj.getFullYear();
-            const horas = fechaObj.getHours();
-            const minutos = fechaObj.getMinutes().toString().padStart(2, "0");
-            const segundos = fechaObj.getSeconds().toString().padStart(2, "0");
-            fechaFormateada = `${dia}/${mes}/${anio}, ${horas}:${minutos}:${segundos}`;
-          } else {
-            fechaFormateada = new Date().toLocaleString("es-ES");
+      if (!usuario || !token) throw new Error("No autenticado");
+
+      const endpointMascotas =
+        usuario.tipo === "administrador"
+          ? "http://localhost:3001/api/mascotas/obtener"
+          : `http://localhost:3001/api/mascotas/dueno/${usuario.id}`;
+
+      const resMascotas = await fetch(endpointMascotas, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!resMascotas.ok) throw new Error("Error al obtener mascotas");
+      const dataMascotas = await resMascotas.json();
+      setMascotas(dataMascotas);
+
+      const ubicacionesPromises = dataMascotas.map(async (mascota) => {
+        const resUbicaciones = await fetch(
+          `http://localhost:3001/api/localizaciones/mascota/${mascota.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
+        );
+
+        if (!resUbicaciones.ok) return [];
+
+        const { localizaciones } = await resUbicaciones.json();
+
+        return localizaciones.map((u) => {
+          const fechaObj = new Date(u.fecha);
+          const fechaFormateada = `${fechaObj.getDate()}/${fechaObj.getMonth() + 1}/${fechaObj.getFullYear()}, ${fechaObj.getHours()}:${fechaObj.getMinutes().toString().padStart(2, "0")}:${fechaObj.getSeconds().toString().padStart(2, "0")}`;
 
           return {
             nombre: mascota.nombre,
             lugar: `${u.longitud},${u.latitud}`,
             coords: [u.longitud, u.latitud],
             fecha: fechaFormateada,
-            comentario: u.comentario ? true : false,
+            comentario: !!u.comentario,
             comentarioTexto: u.comentarioTexto || "",
           };
         });
-      }
-      return [];
-    });
+      });
 
-    // Espera a que todas las promesas terminen
-    const ubicacionesArray = await Promise.all(ubicacionesPromises);
-    // Junta todos los arrays en uno solo
-    const todasUbicaciones = ubicacionesArray.flat();
+      const ubicacionesArray = await Promise.all(ubicacionesPromises);
+      const todasUbicaciones = ubicacionesArray.flat();
 
-    setUbicaciones(todasUbicaciones);
-    // agregar ubcaciones a varible ubicaciones
-  } catch (error) {
-    console.error("Error fetching mascotas:", error);
-  }
-};
+      setUbicaciones(todasUbicaciones);
+    } catch (error) {
+      console.error("Error al obtener mascotas y ubicaciones:", error);
+    }
+  };
+
 
 const ajustarMapa = () => {
   if (!mapInstance.current) return;
