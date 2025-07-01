@@ -1,7 +1,7 @@
 const db = require("../db");
 
 const crearMascota = async (req, res) => {
-  const { nombre, descripcion, id_dueno } = req.body;
+  const { nombre, descripcion, tipo , edad, raza, alergias, id_dueno } = req.body;
 
   console.log("Datos recibidos para crear mascota:", req.body);
   if (!nombre || !id_dueno) {
@@ -25,8 +25,21 @@ const crearMascota = async (req, res) => {
 
     // Crear la mascota
     const [result] = await db.query(
-      "INSERT INTO Mascota (nombre, descripcion, fecha_registro, estado, id_dueno, nombre_dueno) VALUES (?, ?, ?, ?, ?, ?)",
-      [nombre, descripcion, fecha_registro, estado, id_dueno, nombre_dueno]
+      `INSERT INTO Mascota 
+      (nombre, descripcion, tipo, raza, edad, alergias, fecha_registro, estado, id_dueno, nombre_dueno) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+      nombre,
+      descripcion || "",
+      tipo || "",
+      raza || "",
+      edad || "",
+      alergias || "",
+      fecha_registro,
+      estado,
+      id_dueno,
+      nombre_dueno
+      ]
     );
 
     res.status(201).json({ id: result.insertId });
@@ -98,12 +111,12 @@ const eliminarMascota = async (req, res) => {
 
 const editarMascota = async (req, res) => {
   const { id } = req.params;
-  const { nombre, descripcion } = req.body;
+  const { nombre, descripcion, tipo, raza, edad, alergias } = req.body;
 
   try {
     const [result] = await db.query(
-      "UPDATE Mascota SET nombre = ?, descripcion = ? WHERE id = ?",
-      [nombre, descripcion, id]
+      "UPDATE Mascota SET nombre = ?, descripcion = ?, tipo = ?, raza = ?, edad = ?, alergias = ? WHERE id = ?",
+      [nombre, descripcion, tipo, raza, edad, alergias, id]
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Mascota no encontrada" });

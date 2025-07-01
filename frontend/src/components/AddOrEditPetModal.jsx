@@ -26,9 +26,6 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
         raza: mascota.raza || "",
         edad: mascota.edad || "",
         alergias: mascota.alergias || "",
-        ubicacion: mascota.ubicacion || "",
-        telefonoPrincipal: mascota.telefonoPrincipal || "",
-        telefonoSecundario: mascota.telefonoSecundario || "",
       });
 
       // Si la mascota ya tiene una URL de imagen (mascota.imagenUrl), úsala como preview
@@ -177,61 +174,7 @@ const AddOrEditPetModal = ({ visible, onClose, mascota, onSave }) => {
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
-
-          {/* SECCIÓN: Referencia de Ubicación */}
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Referencia de Ubicación
-            </label>
-            <input
-              name="ubicacion"
-              value={form.ubicacion}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-
-          {/* SECCIÓN: Teléfonos */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Teléfono de Contacto Principal
-              </label>
-              <input
-                name="telefonoPrincipal"
-                value={form.telefonoPrincipal}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Teléfono de Contacto Secundario (Opcional)
-              </label>
-              <input
-                name="telefonoSecundario"
-                value={form.telefonoSecundario}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-          </div>
-
-          {/* SECCIÓN: Imagen de la Mascota */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Imagen de la Mascota (Opcional)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-                         file:rounded-lg file:border-0
-                         file:text-sm file:font-semibold
-                         file:bg-red-50 file:text-red-700
-                         hover:file:bg-red-100"
-            />
             {/* Previsualización de la imagen seleccionada o existente */}
             {previewUrl && (
               <div className="mt-3">
