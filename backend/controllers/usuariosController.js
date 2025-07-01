@@ -15,14 +15,17 @@ const getUsers = async (req, res) => {
   }
 };
 
-
 const registerUser = async (req, res) => {
-  const { nombre, correo, contrasena } = req.body;
+  const { nombre, correo, contrasena, tipo } = req.body;
 
-  console.log("REQ.BODY:", req.body); 
+  console.log("REQ.BODY:", req.body);
 
-  if (!nombre || !correo || !contrasena) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  if (!nombre || !correo || !contrasena || !tipo) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios, incluyendo tipo' });
+  }
+
+  if (!['administrador', 'dueno'].includes(tipo)) {
+    return res.status(400).json({ error: 'Tipo de usuario no válido' });
   }
 
   try {
@@ -33,13 +36,13 @@ const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(contrasena, 10);
     const [result] = await db.query(
-      'INSERT INTO Usuario (nombre, correo, contrasena) VALUES (?, ?, ?)',
-      [nombre, correo, hashedPassword]
+      'INSERT INTO Usuario (nombre, correo, contrasena, tipo) VALUES (?, ?, ?, ?)',
+      [nombre, correo, hashedPassword, tipo]
     );
 
-    console.log("👤 Resultado de INSERT:", result); // ⬅️ log clave
+    console.log("👤 Resultado de INSERT:", result);
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'Usuario registrado exitosamente',
       id: result.insertId
     });
@@ -50,39 +53,41 @@ const registerUser = async (req, res) => {
   }
 };
 
+const loginUser = async (req, res) => {
+  const { correo, contrasena } = req.body;
 
-  const loginUser = async (req, res) => {
-    const { correo, contrasena } = req.body;
-  
-    if (!correo || !contrasena)
-      return res.status(400).json({ error: 'Email y contrasena son requeridos' });
-  
-    try {
-      const [users] = await db.query('SELECT * FROM Usuario WHERE correo = ?', [correo]);
-      if (users.length === 0)
-        return res.status(401).json({ error: 'Usuario no encontrado' });
-  
-      const user = users[0];
-      const isMatch = await bcrypt.compare(contrasena, user.contrasena);
-  
-      if (!isMatch)
-        return res.status(401).json({ error: 'contrasena incorrecta' });
-  
+  if (!correo || !contrasena)
+    return res.status(400).json({ error: 'Email y contrasena son requeridos' });
+
+  try {
+    const [users] = await db.query('SELECT * FROM Usuario WHERE correo = ?', [correo]);
+    if (users.length === 0)
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+
+    const user = users[0];
+    const isMatch = await bcrypt.compare(contrasena, user.contrasena);
+
+    if (!isMatch)
+      return res.status(401).json({ error: 'contrasena incorrecta' });
+
     const token = jwt.sign(
-       {id: user.id, nombre: user.nombre, correo: user.correo },
+      {
+        id: user.id,
+        nombre: user.nombre,
+        correo: user.correo,
+        tipo: user.tipo 
+      },
+      process.env.JWT_SECRET || "claveSecreta",
+      { expiresIn: '1h' }
+    );
 
-        process.env.JWT_SECRET || "claveSecreta",
-        { expiresIn: '1h' }
-      );
-  
-      res.json({ message: 'Login exitoso', token });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error interno del servidor' });
-    }
-  };
+    res.json({ message: 'Login exitoso', token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
 
-  
 const updateUser = async (req, res) => {
   const userId = req.user.id;
   const { nombre, correo, contrasena, telefono } = req.body;
@@ -125,7 +130,6 @@ const updateUser = async (req, res) => {
   }
 };
 
-
 const obtenerContacto = async (req, res) => {
   const userId = req.params.id;
 
@@ -138,7 +142,7 @@ const obtenerContacto = async (req, res) => {
 
     const result = {
       correo: rows[0].correo,
-      telefono: rows[0].telefono, 
+      telefono: rows[0].telefono,
       nombre: rows[0].nombre
     };
 
@@ -153,18 +157,14 @@ const eliminarUsuario = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // 1. Obtener IDs de mascotas del usuario
     const [mascotas] = await db.query('SELECT id FROM Mascota WHERE id_dueno = ?', [id]);
 
-    // 2. Eliminar localizaciones asociadas a cada mascota
     for (const mascota of mascotas) {
       await db.query('DELETE FROM Localizacion WHERE mascota_id = ?', [mascota.id]);
     }
 
-    // 3. Eliminar mascotas
     await db.query('DELETE FROM Mascota WHERE id_dueno = ?', [id]);
 
-    // 4. Eliminar usuario
     const [result] = await db.query('DELETE FROM Usuario WHERE id = ?', [id]);
 
     if (result.affectedRows === 0) {
@@ -177,7 +177,6 @@ const eliminarUsuario = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar el usuario' });
   }
 };
-
 
 const cambiarContrasena = async (req, res) => {
   const { actual, nueva } = req.body;
@@ -200,9 +199,12 @@ const cambiarContrasena = async (req, res) => {
   }
 };
 
-
-
-
-
-
-module.exports = { registerUser, getUsers , loginUser , updateUser, obtenerContacto, eliminarUsuario, cambiarContrasena};
+module.exports = {
+  registerUser,
+  getUsers,
+  loginUser,
+  updateUser,
+  obtenerContacto,
+  eliminarUsuario,
+  cambiarContrasena
+};
