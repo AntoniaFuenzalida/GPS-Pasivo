@@ -16,8 +16,8 @@ const getUsers = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-  const { nombre, correo, contrasena, tipo } = req.body;
-
+  const { nombre, correo, contrasena } = req.body;
+  tipo = req.body.tipo || 'dueno';
   console.log("REQ.BODY:", req.body);
 
   if (!nombre || !correo || !contrasena || !tipo) {
