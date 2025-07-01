@@ -4,7 +4,9 @@ import { FiSearch, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import { PiPawPrintFill } from "react-icons/pi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
- 
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9008/api";
+
 const badgeStyle = {
   Activo: "bg-green-100 text-green-800",
   Inactivo: "bg-red-100 text-red-800",
@@ -20,20 +22,18 @@ const AdminUsuarios = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editForm, setEditForm] = useState({ nombre: "", correo: "", estado: "" });
 
+  const fetchUsuarios = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/users`);
+      setUsuarios(response.data);
+    } catch (err) {
+      console.error("Error al obtener usuarios:", err);
+    }
+  };
 
-const fetchUsuarios = async () => {
-  try {
-    const response = await axios.get("http://localhost:3001/api/users");
-    setUsuarios(response.data);
-  } catch (err) {
-    console.error("Error al obtener usuarios:", err);
-  }
-};
-
-useEffect(() => {
-  fetchUsuarios();
-}, []);
-
+  useEffect(() => {
+    fetchUsuarios();
+  }, []);
 
   const usuariosFiltrados = usuarios.filter((u) =>
     `${u.nombre} ${u.correo} ${u.estado || ""}`
@@ -41,36 +41,36 @@ useEffect(() => {
       .includes(busqueda.toLowerCase())
   );
   const handleEliminar = async (id) => {
-  try {
-    await axios.delete(`http://localhost:3001/api/users/${id}`);
-    setUsuarios(prev => prev.filter(u => u.id !== id));
-    toast.success("Usuario eliminado correctamente");
-  } catch (err) {
-    toast.error(err?.response?.data?.error || "Error al eliminar usuario");
-    console.error("Error al eliminar usuario:", err);
-  }
-};
+    try {
+      await axios.delete(`${API_URL}/users/${id}`);
+      setUsuarios(prev => prev.filter(u => u.id !== id));
+      toast.success("Usuario eliminado correctamente");
+    } catch (err) {
+      toast.error(err?.response?.data?.error || "Error al eliminar usuario");
+      console.error("Error al eliminar usuario:", err);
+    }
+  };
 
-const handleSaveEdit = async () => {
-  try {
-    await axios.put(`http://localhost:3001/api/update`, editForm);
-    toast.success("Usuario actualizado correctamente");
-    setShowEditModal(false);
-    setSelectedUser(null);
-    fetchUsuarios(); // Recargar la lista
-  } catch (err) {
-    toast.error(err?.response?.data?.error || "Error al actualizar usuario");
-    console.error("Error al actualizar usuario:", err);
-  }
-};
+  const handleSaveEdit = async () => {
+    try {
+      await axios.put(`${API_URL}/update`, editForm);
+      toast.success("Usuario actualizado correctamente");
+      setShowEditModal(false);
+      setSelectedUser(null);
+      fetchUsuarios(); // Recargar la lista
+    } catch (err) {
+      toast.error(err?.response?.data?.error || "Error al actualizar usuario");
+      console.error("Error al actualizar usuario:", err);
+    }
+  };
 
-const handleConfirmDelete = async () => {
-  if (selectedUser) {
-    await handleEliminar(selectedUser.id);
-    setShowDeleteModal(false);
-    setSelectedUser(null);
-  }
-};
+  const handleConfirmDelete = async () => {
+    if (selectedUser) {
+      await handleEliminar(selectedUser.id);
+      setShowDeleteModal(false);
+      setSelectedUser(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 px-8 py-10">
@@ -278,7 +278,7 @@ const ViewPetsModal = ({ visible, onClose, mascotas, userId }) => {
   const fetchMascotasUsuario = async (id) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3001/api/mascotas/dueno/${id}`);
+      const response = await axios.get(`${API_URL}/mascotas/dueno/${id}`);
       setMascotasData(response.data);
     } catch (err) {
       console.error("Error al obtener mascotas:", err);

@@ -14,6 +14,8 @@ import {
 } from "recharts";
 import { FiUsers, FiHome, FiMap, FiActivity } from "react-icons/fi";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9008/api";
+
 const COLORS = ["#4F46E5", "#EF4444"]; // azul para activos, rojo para inactivos
 
 const AdminDashboard = () => {
@@ -27,7 +29,7 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:3001/api/estadisticas/totales"
+          `${API_URL}/estadisticas/totales`
         );
         setStats(data);
       } catch (error) {

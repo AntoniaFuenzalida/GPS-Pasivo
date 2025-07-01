@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9008/api";
+
 const Register = () => {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
@@ -18,7 +20,7 @@ const handleSubmit = async (e) => {
   }
 
   try {
-    const response = await axios.post("http://localhost:3001/api/register", {
+    const response = await axios.post(`${API_URL}/register`, {
       nombre: fullName,
       correo: email,
       contrasena: password,

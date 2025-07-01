@@ -6,32 +6,37 @@ networks:
 
 services:
   db:
-    image: mysql:8
-    container_name: mysql_db
+    image: mysql:${MYSQL_VERSION}
+    container_name: ${MYSQL_CONTAINER_NAME}
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: gps
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: Utalca_123
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${DATABASE_PORT}:${DATABASE_INTERNAL_PORT}"
     volumes:
-      - db_data:/var/lib/mysql
+      - ${DOCKER_VOLUME}:/var/lib/mysql
     restart: always
     networks:
       - gps-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin", "-pUtalca_123"]
-      timeout: 20s
-      retries: 10
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
+      timeout: ${HEALTHCHECK_TIMEOUT}
+      retries: ${HEALTHCHECK_RETRIES}
 
   backend:
     build: ./backend
     ports:
-      - "3001:3001"
+      - "${BACKEND_PORT}:${BACKEND_INTERNAL_PORT}"
     environment:
-      - NODE_ENV=production
-      - JWT_SECRET=claveSecreta
+      - NODE_ENV=${NODE_ENV}
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_HOST=${DB_HOST_INTERNAL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DATABASE_INTERNAL_PORT}
     depends_on:
       db:
         condition: service_healthy
@@ -42,7 +47,9 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT}:${FRONTEND_INTERNAL_PORT}"
+    environment:
+      - REACT_APP_API_URL=${BACKEND_URL}
     depends_on:
       - backend
     restart: always
@@ -51,10 +58,10 @@ services:
 
   adminer:
     image: adminer
-    container_name: adminer_web
+    container_name: ${ADMINER_CONTAINER_NAME}
     restart: always
     ports:
-      - 8080:8080
+      - ${ADMINER_PORT}:${ADMINER_INTERNAL_PORT}
     depends_on:
       - db
     networks:

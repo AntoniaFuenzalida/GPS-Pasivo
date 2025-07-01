@@ -6,6 +6,7 @@ import CommentModal from "../components/CommentModal";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9008/api";
 
 const ubicaciones1 = [
   {
@@ -68,8 +69,8 @@ const MapPage = () => {
 
       const endpointMascotas =
         usuario.tipo === "administrador"
-          ? "http://localhost:3001/api/mascotas/obtener"
-          : `http://localhost:3001/api/mascotas/dueno/${usuario.id}`;
+          ? `${API_URL}/mascotas/obtener`
+          : `${API_URL}/mascotas/dueno/${usuario.id}`;
 
       const resMascotas = await fetch(endpointMascotas, {
         headers: {
@@ -83,7 +84,7 @@ const MapPage = () => {
 
       const ubicacionesPromises = dataMascotas.map(async (mascota) => {
         const resUbicaciones = await fetch(
-          `http://localhost:3001/api/localizaciones/mascota/${mascota.id}`,
+          `${API_URL}/localizaciones/mascota/${mascota.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

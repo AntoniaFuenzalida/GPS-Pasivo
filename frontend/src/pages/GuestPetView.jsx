@@ -6,6 +6,8 @@ import OwnerContactCard from "../components/OwnerContactCard";
 import PetMapPreview from "../components/PetMapPreview";
 import CommentsModal from "../components/CommentsModal";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9008/api";
+
 const GuestPetView = () => {
   const { id } = useParams();
   const [mascotaComentarios, setMascotaComentarios] = useState([]);
@@ -21,7 +23,7 @@ const GuestPetView = () => {
   const fetchContacto = useCallback(async (duenoId) => {
     if (!duenoId) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/usuarios/contacto/${duenoId}`);
+      const res = await fetch(`${API_URL}/usuarios/contacto/${duenoId}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setContacto({
@@ -35,7 +37,7 @@ const GuestPetView = () => {
 
   const fetchComentarios = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:3001/api/mascotas/comentarios/${id}`);
+      const res = await fetch(`${API_URL}/mascotas/comentarios/${id}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setMascotaComentarios(data.map((c) => c.info));
@@ -46,7 +48,7 @@ const GuestPetView = () => {
 
   const fetchUltimaUbicacion = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:3001/api/mascotas/ubicacion/${id}`);
+      const res = await fetch(`${API_URL}/mascotas/ubicacion/${id}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setUltimaUbicacion(data);
@@ -57,7 +59,7 @@ const GuestPetView = () => {
 
   const fetchMascota = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:3001/api/mascotas/obtener/${id}`);
+      const res = await fetch(`${API_URL}/mascotas/obtener/${id}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setMascota(data);
@@ -83,7 +85,7 @@ const GuestPetView = () => {
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/mascotas/comentarios/${id}`, {
+      const res = await fetch(`${API_URL}/mascotas/comentarios/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ info: newComment.trim() }),

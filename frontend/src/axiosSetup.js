@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:3001/api";
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || "http://localhost:9008/api";
 
 // Añade el token en cada request
 axios.interceptors.request.use((config) => {

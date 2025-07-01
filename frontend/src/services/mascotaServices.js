@@ -1,7 +1,7 @@
 
 import axios from "axios";
 
-const API_URL = "http://localhost:3001/api/mascotas";
+const API_URL = `${process.env.REACT_APP_API_URL || "http://localhost:9008/api"}/mascotas`;
 
 export const obtenerMascotasPorDueno = async (id_dueno) => {
   const response = await axios.get(`${API_URL}/dueno/${id_dueno}`);
