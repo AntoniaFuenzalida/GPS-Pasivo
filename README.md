@@ -3,7 +3,7 @@
 Sistema completo de localización de mascotas con frontend React, backend Node.js y base de datos MySQL.
 
 ## 🚀 Instalación en VM (Servidor)
-
+w
 ### Prerequisitos
 - Git
 - Docker
