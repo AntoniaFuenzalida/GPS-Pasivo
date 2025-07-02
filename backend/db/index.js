@@ -1,14 +1,20 @@
 const mysql = require('mysql2');
+require('dotenv').config();
+
+// Usa DB_HOST_INTERNAL si está en Docker, DB_HOST_EXTERNAL si no
+const dbHost = process.env.DOCKERIZED === 'true' 
+  ? process.env.DB_HOST_INTERNAL 
+  : process.env.DB_HOST_EXTERNAL;
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'db',
+  host: dbHost || process.env.DB_HOST || 'db',
   user: process.env.DB_USER || 'admin',
   password: process.env.DB_PASSWORD || 'Utalca_123',
-  port: process.env.DB_PORT || 3306,
+  port: process.env.DATABASE_INTERNAL_PORT || 3306,
   database: process.env.DB_NAME || 'gps',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  waitForConnections: process.env.DB_WAIT_FOR_CONNECTIONS === 'true',
+  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10,
+  queueLimit: parseInt(process.env.DB_QUEUE_LIMIT) || 0
 });
 
 module.exports = pool.promise();

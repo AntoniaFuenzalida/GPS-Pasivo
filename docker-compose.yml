@@ -32,11 +32,16 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - JWT_SECRET=${JWT_SECRET}
-      - DB_HOST=${DB_HOST_INTERNAL}
+      - DOCKERIZED=true
+      - DB_HOST_INTERNAL=${DB_HOST_INTERNAL}
+      - DB_HOST_EXTERNAL=${DB_HOST_EXTERNAL}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
-      - DB_PORT=${DATABASE_INTERNAL_PORT}
+      - DATABASE_INTERNAL_PORT=${DATABASE_INTERNAL_PORT}
+      - DB_CONNECTION_LIMIT=${DB_CONNECTION_LIMIT}
+      - DB_QUEUE_LIMIT=${DB_QUEUE_LIMIT}
+      - DB_WAIT_FOR_CONNECTIONS=${DB_WAIT_FOR_CONNECTIONS}
     depends_on:
       db:
         condition: service_healthy
