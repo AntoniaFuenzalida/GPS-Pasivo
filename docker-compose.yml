@@ -4,16 +4,16 @@ services:
   backend:
     build: ./backend
     ports:
-      - "3001:3001"
+      - "${BACKEND_PORT}:${BACKEND_INTERNAL_PORT}"
     environment:
-      - NODE_ENV=production
-      - JWT_SECRET=claveSecreta
+      - NODE_ENV=${NODE_ENV}
+      - JWT_SECRET=${JWT_SECRET}
       - DOCKERIZED=false
       - DB_HOST_EXTERNAL=${DB_HOST_EXTERNAL}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
-      - DATABASE_EXTERNAL_PORT=3306
+      - DATABASE_EXTERNAL_PORT=${DATABASE_EXTERNAL_PORT}
       - DB_CONNECTION_LIMIT=${DB_CONNECTION_LIMIT}
       - DB_QUEUE_LIMIT=${DB_QUEUE_LIMIT}
       - DB_WAIT_FOR_CONNECTIONS=${DB_WAIT_FOR_CONNECTIONS}
@@ -22,7 +22,9 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT}:${FRONTEND_INTERNAL_PORT}"
+    environment:
+      - REACT_APP_API_URL=${BACKEND_URL}
     depends_on:
       - backend
     restart: always
