@@ -1,76 +1,49 @@
 version: '3.8'
 
-networks:
-  gps-network:
-    driver: bridge
-
 services:
-  db:
-    image: mysql:${MYSQL_VERSION}
-    container_name: ${MYSQL_CONTAINER_NAME}
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${DATABASE_PORT}:${DATABASE_INTERNAL_PORT}"
-    volumes:
-      - ${DOCKER_VOLUME}:/var/lib/mysql
-    restart: always
-    networks:
-      - gps-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
-      timeout: ${HEALTHCHECK_TIMEOUT}
-      retries: ${HEALTHCHECK_RETRIES}
-
   backend:
     build: ./backend
     ports:
-      - "${BACKEND_PORT}:${BACKEND_INTERNAL_PORT}"
+      - "3001:3001"
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - JWT_SECRET=${JWT_SECRET}
-      - DOCKERIZED=true
-      - DB_HOST_INTERNAL=${DB_HOST_INTERNAL}
+      - NODE_ENV=production
+      - JWT_SECRET=claveSecreta
+      - DOCKERIZED=false
       - DB_HOST_EXTERNAL=${DB_HOST_EXTERNAL}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
-      - DATABASE_INTERNAL_PORT=${DATABASE_INTERNAL_PORT}
+      - DATABASE_EXTERNAL_PORT=3306
       - DB_CONNECTION_LIMIT=${DB_CONNECTION_LIMIT}
       - DB_QUEUE_LIMIT=${DB_QUEUE_LIMIT}
       - DB_WAIT_FOR_CONNECTIONS=${DB_WAIT_FOR_CONNECTIONS}
-    depends_on:
-      db:
-        condition: service_healthy
     restart: always
-    networks:
-      - gps-network
 
   frontend:
     build: ./frontend
     ports:
-      - "${FRONTEND_PORT}:${FRONTEND_INTERNAL_PORT}"
-    environment:
-      - REACT_APP_API_URL=${BACKEND_URL}
+      - "3000:80"
     depends_on:
       - backend
     restart: always
-    networks:
-      - gps-network
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gps
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Utalca_123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
 
   adminer:
     image: adminer
-    container_name: ${ADMINER_CONTAINER_NAME}
     restart: always
     ports:
-      - ${ADMINER_PORT}:${ADMINER_INTERNAL_PORT}
-    depends_on:
-      - db
-    networks:
-      - gps-network
+      - 8080:8080
 
 volumes:
   db_data:
