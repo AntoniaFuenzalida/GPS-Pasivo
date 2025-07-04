@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9008/api";
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Register = () => {
+  // Debug: verificar qué URL se está usando
+  console.log("🔍 API_URL:", API_URL);
+  console.log("🔍 REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
